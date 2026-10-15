@@ -1,0 +1,297 @@
+---
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+import Badge from '@/components/ui/Badge.astro'
+import Input from '@/components/ui/Input.astro'
+import Card from '@/components/ui/Card.astro'
+
+/** 并排演示的两个主题作用域。 */
+const scopes = [
+  { theme: 'dark', label: "data-theme='dark'" },
+  { theme: 'light', label: "data-theme='light'" },
+] as const
+---
+
+<Docs title="主题" description="zz design system 的主题：token 挂在 data-theme 上，任何子树都能局部换主题。">
+  <span class="zz-doc__eyebrow">扩展 / 主题</span>
+  <h1 class="zz-doc__title">主题</h1>
+  <p class="zz-doc__lede">
+    主题不是编译期开关，而是一组普通自定义属性：<code>--zz-*</code> 定义在 <code>:root</code> 与
+    <code>[data-theme='…']</code> 上，切换主题只是换一个 <code>data-theme</code> 值。
+    因为它们是继承的自定义属性，<strong>任何子树都能局部换主题</strong>——一块卡片、一个侧栏，甚至下面这两个并排的面板。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>机制</h2>
+    <p>
+      三件事同时成立，才能既有全局主题又有局部主题：
+    </p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>环节</th><th>做法</th><th>为什么</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>定义</td>
+          <td>token 写在 <code>:root</code> 与 <code>[data-theme='dark' | 'light']</code> 块里</td>
+          <td>普通自定义属性，继承并可在任意层级被覆盖</td>
+        </tr>
+        <tr>
+          <td>消费</td>
+          <td>组件只写 <code>var(--zz-*)</code>，不写 <code>--color-zz-*</code>，不写死色值</td>
+          <td><code>--color-zz-*</code> 是 <code>@theme inline</code> 桥接出的 Tailwind 命名空间，值被内联进工具类，不保证作为运行时变量存在</td>
+        </tr>
+        <tr>
+          <td>作用域</td>
+          <td>任何元素加 <code>data-theme</code>，其子树立即用新主题渲染</td>
+          <td>局部主题与全局主题走同一条路径，没有第二套机制</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre class="zz-doc__code"><code>{`<!-- 深色页面里嵌一块亮色区域：不加类、不加脚本 -->
+<article data-theme="light">
+  <h3>这张卡片是亮色的</h3>
+  <p>里面的按钮、输入框、描边全部自动跟随。</p>
+</article>`}</code></pre>
+    <p class="zz-doc__note">
+      别忘了 <code>color-scheme</code>：主题块里跟着写 <code>color-scheme: dark</code> / <code>light</code>，
+      原生控件（滚动条、输入框、日期选择器）才会跟着局部主题走。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>并排对比</h2>
+    <p>
+      两块内容完全相同，只有 <code>data-theme</code> 不同。它们的样式只依赖 token，
+      所以局部主题在这里是真实生效的，不是截图替换。
+    </p>
+    <div class="th-grid">
+      {
+        scopes.map((scope) => (
+          <div class="th-panel" data-theme={scope.theme}>
+            <p class="th-panel__label">{scope.label}</p>
+            <h3 class="th-panel__title">局部主题作用域</h3>
+            <p class="th-panel__body">
+              这段正文的颜色来自 <code>--zz-text-secondary</code>；改容器的 data-theme，它整体换色。
+            </p>
+
+            <div class="th-panel__row">
+              <Button>主操作</Button>
+              <Button variant="outline">次要描边</Button>
+              <Badge variant="brand">stable</Badge>
+            </div>
+
+            <div class="th-panel__field">
+              <Input placeholder="输入框 · 控件描边" aria-label="主题对比输入框" />
+            </div>
+
+            <div class="th-panel__card">
+              <Card
+                title="卡片小样"
+                description="卡片底是 --zz-surface，浮起用 --zz-elevation。"
+                meta="2026-10-15 · 1,204 字"
+              />
+            </div>
+          </div>
+        ))
+      }
+    </div>
+    <pre class="zz-doc__code"><code>{`<!-- 同一批组件、同一份标记，只有容器的 data-theme 不同 -->
+<div data-theme="dark">
+  <Button>主操作</Button>
+  <Button variant="outline">次要描边</Button>
+  <Badge variant="brand">stable</Badge>
+  <Input placeholder="输入框 · 控件描边" />
+  <Card title="卡片小样" description="…" meta="2026-10-15 · 1,204 字" />
+</div>
+
+<div data-theme="light">
+  <!-- 完全相同的标记 -->
+</div>`}</code></pre>
+    <p class="zz-doc__note">
+      注意两边的描边与"浮起"并不相同：深色面板靠一圈 1px 外描边区分层级，亮色面板叠了极轻的投影。
+      这是 token 值的差异，不是组件的差异——两块面板里放的是同一批组件（Button / Badge / Input / Card），
+      没有任何一行按主题分支的样式。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>切换主题</h2>
+    <p>全局切换就是改根元素的属性并记住选择。用它自己的过渡，别让每个颜色各自补间。</p>
+    <pre class="zz-doc__code"><code>{`// 切换 + 记住选择
+const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+document.documentElement.dataset.theme = next
+localStorage.setItem('zz-theme', next)
+
+// 想让切换走那道斜切裂缝（并在切换瞬间关掉全局过渡）
+document.documentElement.classList.add('zz-no-transitions')
+const transition = document.startViewTransition(() => {
+  document.documentElement.dataset.theme = next
+})
+transition.finished.finally(() => document.documentElement.classList.remove('zz-no-transitions'))`}</code></pre>
+    <p>
+      首屏不能等 JS 跑完再决定主题，否则会闪一下默认主题。把决定提前到 <code>&lt;head&gt;</code> 里的内联脚本，
+      在任何样式内容绘制之前写 <code>data-theme</code>：
+    </p>
+    <pre class="zz-doc__code"><code>{`<!-- <head> 内，必须是 is:inline，且不依赖任何外部脚本 -->
+<script is:inline>
+  ;(() => {
+    const stored = localStorage.getItem('zz-theme')
+    const system = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+    document.documentElement.dataset.theme =
+      stored === 'light' || stored === 'dark' ? stored : system
+  })()
+</script>`}</code></pre>
+    <ul class="zz-doc__note">
+      <li>脚本必须在 <code>&lt;head&gt;</code>，且是内联的：外链脚本会晚一步执行，闪白就回来了。</li>
+      <li>取值顺序是「已存的选择 → 系统偏好 → 兜底 dark」。非法值（被改过的 localStorage）一律回落到系统偏好。</li>
+      <li><code>prefers-reduced-motion: reduce</code> 时跳过 <code>startViewTransition</code>，直接同步切换。</li>
+    </ul>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>新增一套主题</h2>
+    <p>
+      复制 <code>[data-theme='light']</code> 整块，改选择器名，然后按下表逐项决定。总共有
+      <strong>12 个颜色值 + field 六阶 + 3 个覆盖 token</strong>，再加两行层级与一行 <code>color-scheme</code>。
+    </p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>分组</th><th>token</th><th>决定什么</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>面 4</td>
+          <td><code>--zz-bg-deep</code> <code>--zz-bg</code> <code>--zz-surface</code> <code>--zz-surface-2</code></td>
+          <td>凹槽 → 页面 → 面板 → 悬停面，必须逐级可区分</td>
+        </tr>
+        <tr>
+          <td>线 2</td>
+          <td><code>--zz-border-subtle</code> <code>--zz-border-strong</code></td>
+          <td>发丝线（常与 surface-2 同值）与控件描边；后者必须明显看得见</td>
+        </tr>
+        <tr>
+          <td>文字 3</td>
+          <td><code>--zz-text</code> <code>--zz-text-secondary</code> <code>--zz-text-muted</code></td>
+          <td>三档实色，各自独立对背景校对比度，不用透明度派生</td>
+        </tr>
+        <tr>
+          <td>品牌 3</td>
+          <td><code>--zz-brand</code> <code>--zz-brand-soft</code> <code>--zz-brand-ink</code></td>
+          <td>强调色、它的 12% 透明版、填充之上的文字色</td>
+        </tr>
+        <tr>
+          <td>field 六阶</td>
+          <td><code>--zz-field-bg</code> <code>--zz-field-dim</code> <code>--zz-field-mid</code> <code>--zz-field-lit</code> <code>--zz-field-hover</code> <code>--zz-field-crest</code></td>
+          <td>品牌明度梯：字标渐变、像素场、滚动条滑块的 hover / active</td>
+        </tr>
+        <tr>
+          <td>覆盖 3</td>
+          <td><code>--zz-img-outline</code> <code>--zz-scroll-thumb</code> <code>--zz-selection</code></td>
+          <td>图片 1px 描边、滚动条滑块、文本选区底色</td>
+        </tr>
+        <tr>
+          <td>层级 2</td>
+          <td><code>--zz-elevation</code> <code>--zz-elevation-hover</code></td>
+          <td>亮色主题叠真实投影，深色主题只用零模糊描边</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre class="zz-doc__code"><code>{`[data-theme='ocean'] {
+  color-scheme: dark;               /* 决定原生控件与滚动条的明暗 */
+
+  /* 面 4 */
+  --zz-bg-deep: …;
+  --zz-bg: …;
+  --zz-surface: …;
+  --zz-surface-2: …;
+
+  /* 线 2 */
+  --zz-border-subtle: …;            /* 发丝线，通常与 surface-2 同值 */
+  --zz-border-strong: …;            /* 控件描边 */
+
+  /* 文字 3 */
+  --zz-text: …;
+  --zz-text-secondary: …;
+  --zz-text-muted: …;
+
+  /* 品牌 3：soft 保持派生，不用手改 */
+  --zz-brand: …;
+  --zz-brand-soft: color-mix(in srgb, var(--zz-brand) 12%, transparent);
+  --zz-brand-ink: …;
+
+  /* field 六阶 */
+  --zz-field-bg: …;
+  --zz-field-dim: …;
+  --zz-field-mid: …;
+  --zz-field-lit: …;
+  --zz-field-hover: …;
+  --zz-field-crest: …;
+
+  /* 覆盖 3 */
+  --zz-img-outline: …;
+  --zz-scroll-thumb: …;
+  --zz-selection: …;
+
+  /* 层级 2：深色用 1px 零模糊描边，亮色才叠投影 */
+  --zz-elevation: 0 0 0 1px oklch(1 0 0 / 0.07);
+  --zz-elevation-hover: 0 0 0 1px oklch(1 0 0 / 0.13);
+}`}</code></pre>
+    <ul class="zz-doc__note">
+      <li><code>--zz-brand-soft</code> 保持 <code>color-mix</code> 派生行不动，实际只需手写 11 个颜色值。</li>
+      <li>新主题挂上去即可用：<code>document.documentElement.dataset.theme = 'ocean'</code>，或给任意子树加 <code>data-theme="ocean"</code>。</li>
+      <li>交付前跑 <code>node scripts/check-tokens.mjs</code>，它只允许色值出现在 <code>src/styles/tokens.css</code>。</li>
+      <li>验收清单：四个面逐级可区分、两种线的强弱关系正确、焦点环在 <code>--zz-bg</code> 与 <code>--zz-surface</code> 上都看得见、正文在两种主题下都能读。</li>
+    </ul>
+  </section>
+
+  <style>
+    .th-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+      margin-top: 1rem;
+    }
+
+    /* 面板自己不带任何写死的颜色：全部经 var(--zz-*) 取自所在作用域 */
+    .th-panel {
+      border: 1px solid var(--zz-border-subtle);
+      background: var(--zz-bg);
+      padding: 1.25rem;
+      color: var(--zz-text);
+    }
+
+    .th-panel__label {
+      margin-bottom: 0.5rem;
+      color: var(--zz-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+    }
+
+    .th-panel__title {
+      font-size: 1.125rem;
+    }
+
+    .th-panel__body {
+      margin-top: 0.5rem;
+      color: var(--zz-text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.65;
+    }
+
+    .th-panel__row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    /* 组件自己的颜色全部来自 token，这里只负责排版间距 */
+    .th-panel__field,
+    .th-panel__card {
+      margin-top: 1rem;
+    }
+  </style>
+</Docs>

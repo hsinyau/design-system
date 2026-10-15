@@ -1,0 +1,120 @@
+---
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+---
+
+<Docs title="按钮" description="zz design system 的按钮：6 个变体、8 个尺寸。">
+  <span class="zz-doc__eyebrow">组件 / 基础控件</span>
+  <h1 class="zz-doc__title">按钮</h1>
+  <p class="zz-doc__lede">
+    按钮是唯一负责交互反馈的基础控件。它用 1px 描边而非阴影表达层级，用 <code>scale(0.96)</code>
+    表达按下，从不位移。所有变体共用同一套尺寸阶梯：32 / 36 / 40 / 44px。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>变体</h2>
+    <p>一屏之内最多出现一个 <code>default</code>（品牌填充）按钮，它标记当前视图的主操作。</p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <Button>主操作</Button>
+        <Button variant="outline">次要描边</Button>
+        <Button variant="secondary">次级面</Button>
+        <Button variant="ghost">幽灵</Button>
+        <Button variant="destructive">危险</Button>
+        <Button variant="link">文本链接</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>尺寸</h2>
+    <p>尺寸同时改变高度、内距与字号，图标尺寸自动跟随。</p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <Button size="xs">xs · 32px</Button>
+        <Button size="sm">sm · 36px</Button>
+        <Button size="md">md · 40px</Button>
+        <Button size="lg">lg · 44px</Button>
+      </div>
+      <div class="zz-row" style="margin-top:1rem">
+        <Button size="icon-xs" variant="outline" aria-label="icon-xs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </Button>
+        <Button size="icon-sm" variant="outline" aria-label="icon-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </Button>
+        <Button size="icon" variant="outline" aria-label="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </Button>
+        <Button size="icon-lg" variant="outline" aria-label="icon-lg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>状态</h2>
+    <p>
+      悬停只改背景与描边；焦点环是全局 2px 品牌色外描边，偏移 2px；禁用态把不透明度压到 50%
+      并移除指针事件。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <Button>可点击</Button>
+        <Button disabled>禁用</Button>
+        <Button variant="outline" href="/components/button">链接型按钮</Button>
+        <Button variant="outline" href="/components/button" disabled>链接禁用</Button>
+      </div>
+      <div class="zz-row" style="margin-top:1rem">
+        <div class="zz-btn-group">
+          <Button variant="outline" size="sm">左</Button>
+          <Button variant="outline" size="sm">中</Button>
+          <Button variant="outline" size="sm">右</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>用法</h2>
+    <pre class="zz-doc__code"><code>{`---
+import Button from '@/components/ui/Button.astro'
+---
+
+<Button>主操作</Button>
+<Button variant="outline" size="sm">次要</Button>
+<Button variant="destructive" disabled>删除</Button>`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>类名与 token</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>类名</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.zz-btn</code></td><td>基础结构：内联弹性、等宽字体、1px 透明边框占位、150ms 过渡</td></tr>
+        <tr><td><code>.zz-btn--default</code></td><td>品牌色填充，文字用 <code>--zz-brand-ink</code></td></tr>
+        <tr><td><code>.zz-btn--outline</code></td><td>1px <code>--zz-border-strong</code> 描边 + <code>--zz-surface</code> 底</td></tr>
+        <tr><td><code>.zz-btn--secondary</code></td><td><code>--zz-surface-2</code> 底，用于次级操作</td></tr>
+        <tr><td><code>.zz-btn--ghost</code></td><td>无底，仅悬停出 <code>--zz-surface-2</code>，图标按钮默认</td></tr>
+        <tr><td><code>.zz-btn--destructive</code></td><td>12% 危险色底 + 危险色文字</td></tr>
+        <tr><td><code>.zz-btn--link</code></td><td>无内距，品牌色文字，悬停下划线</td></tr>
+        <tr><td><code>.zz-btn--xs | sm | md | lg</code></td><td>高度 2 / 2.25 / 2.5 / 2.75rem，内距 10 / 12 / 16 / 20px</td></tr>
+        <tr><td><code>.zz-btn--icon | icon-xs | icon-sm | icon-lg</code></td><td>正方形，内距归零</td></tr>
+        <tr><td><code>.zz-btn-group</code></td><td>横向拼接，相邻按钮重叠 1px 边框</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <ul class="zz-doc__note">
+      <li>图标按钮必须带 <code>aria-label</code>（<code>&lt;slot&gt;</code> 里只有 svg 时）。</li>
+      <li>焦点环由全局 <code>:focus-visible</code> 提供，不要用 <code>outline: none</code> 覆盖。</li>
+      <li>渲染成 <code>&lt;a&gt;</code> 时用 <code>aria-disabled</code> 而不是 <code>disabled</code>，并保留可聚焦性。</li>
+      <li>按下反馈是纯视觉变换，不改变布局，因此不会引起重排抖动。</li>
+    </ul>
+  </section>
+</Docs>

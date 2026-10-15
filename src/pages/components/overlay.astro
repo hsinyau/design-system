@@ -1,0 +1,160 @@
+---
+/**
+ * 组件 / 浮层 —— Modal、Tooltip、Dropdown 的文档页。
+ * 三者共用 tokens.css 的层级阶梯：dropdown 200 · modal 300 · tooltip 400。
+ */
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+import Modal from '@/components/ui/Modal.astro'
+import Tooltip from '@/components/ui/Tooltip.astro'
+import Dropdown from '@/components/ui/Dropdown.astro'
+---
+
+<Docs title="浮层" description="zz design system 的浮层：模态对话框、工具提示与下拉菜单。">
+  <span class="zz-doc__eyebrow">组件 / 浮层</span>
+  <h1 class="zz-doc__title">浮层</h1>
+  <p class="zz-doc__lede">
+    浮层是唯一允许脱离文档流的三个组件。它们不靠投影说话，而是用 1px 描边加
+    <code>--zz-elevation</code> 表达「浮起来」，层级全部取自同一套 token：
+    <code>--zz-z-dropdown</code> 200、<code>--zz-z-modal</code> 300、<code>--zz-z-tooltip</code> 400。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>Modal · 模态对话框</h2>
+    <p>
+      遮罩是 <code>--zz-bg-deep</code> 的 72% 混合，压住下面整页（包括顶栏）；面板居中，
+      最大宽 32rem、内距 1.5rem。打开时焦点进入面板，关闭后回到触发按钮，Esc 与点遮罩都能关。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <Modal id="demo-modal" label="发布前确认" trigger="发布站点">
+          <h3 class="zz-modal__title">发布前确认</h3>
+          <p class="zz-modal__desc">
+            将把 42 个页面构建并推送到生产环境，预计 30 秒。此操作会立即替换线上版本。
+          </p>
+          <div class="zz-modal__actions">
+            <button class="zz-btn zz-btn--ghost zz-btn--md" type="button" data-zz-modal-close>
+              取消
+            </button>
+            <button
+              class="zz-btn zz-btn--default zz-btn--md"
+              type="button"
+              data-zz-modal-close
+              data-zz-modal-autofocus
+            >
+              开始发布
+            </button>
+          </div>
+        </Modal>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>Tooltip · 工具提示</h2>
+    <p>
+      纯 CSS，没有脚本：气泡是宿主的 <code>::after</code>，文字来自
+      <code>content: attr(data-tooltip)</code>。悬停或键盘焦点进入后 150ms 出现，
+      离开立刻收起，因此扫过一排按钮时不会闪出一串气泡。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <Tooltip label="复制到剪贴板">
+          <Button variant="outline" size="sm">复制</Button>
+        </Tooltip>
+        <Tooltip label="只在本地构建，不触发部署">
+          <Button variant="outline" size="sm">预览</Button>
+        </Tooltip>
+        <Tooltip label="改用 tabular-nums 对齐数字">
+          <span>悬停在文字上也会出现</span>
+        </Tooltip>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>Dropdown · 下拉菜单</h2>
+    <p>
+      用原生 <code>&lt;details&gt;</code> + <code>&lt;summary&gt;</code>：无 JS 时照样能开合，
+      键盘的 Enter / Space 也是浏览器自带的。脚本只补点击外部关闭与 Esc 关闭。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <Dropdown label="更多操作">
+          <a class="zz-dropdown__item" href="/components/overlay">查看文档</a>
+          <a class="zz-dropdown__item" href="/components/overlay">复制链接</a>
+          <hr class="zz-dropdown__sep" />
+          <button class="zz-dropdown__item zz-dropdown__item--danger" type="button" data-zz-dropdown-close>
+            删除项目
+          </button>
+        </Dropdown>
+        <Dropdown label="贴右对齐" align="end">
+          <button class="zz-dropdown__item" type="button" data-zz-dropdown-close>重命名</button>
+          <button class="zz-dropdown__item" type="button" data-zz-dropdown-close>移动到…</button>
+        </Dropdown>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>用法</h2>
+    <pre class="zz-doc__code"><code>{`---
+import Modal from '@/components/ui/Modal.astro'
+import Tooltip from '@/components/ui/Tooltip.astro'
+import Dropdown from '@/components/ui/Dropdown.astro'
+---
+
+<Modal id="publish" label="发布前确认" trigger="发布站点">
+  <h3 class="zz-modal__title">发布前确认</h3>
+  <p class="zz-modal__desc">将替换线上版本。</p>
+  <div class="zz-modal__actions">
+    <button class="zz-btn zz-btn--ghost zz-btn--md" data-zz-modal-close>取消</button>
+    <button class="zz-btn zz-btn--default zz-btn--md" data-zz-modal-close>开始发布</button>
+  </div>
+</Modal>
+
+<Tooltip label="复制到剪贴板">复制</Tooltip>
+
+<Dropdown label="更多操作">
+  <a class="zz-dropdown__item" href="/docs">查看文档</a>
+  <button class="zz-dropdown__item zz-dropdown__item--danger" data-zz-dropdown-close>删除</button>
+</Dropdown>`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>类名与 token</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>类名 / token</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.zz-modal</code></td><td>全屏遮罩：<code>fixed inset 0</code>、<code>--zz-z-modal</code>、<code>--zz-bg-deep</code> 72% 混合底</td></tr>
+        <tr><td><code>.zz-modal__panel</code></td><td>面板：最大宽 32rem、内距 1.5rem、<code>--zz-surface</code> 底 + <code>--zz-elevation</code></td></tr>
+        <tr><td><code>.zz-modal__title / __desc / __actions</code></td><td>面板内部的标题、说明与右对齐按钮行</td></tr>
+        <tr><td><code>[data-zz-modal-open]</code></td><td>外部触发按钮，值是要打开的容器 id</td></tr>
+        <tr><td><code>[data-zz-modal-close]</code></td><td>关闭按钮；<code>[data-zz-modal-autofocus]</code> 指定初始焦点</td></tr>
+        <tr><td><code>.zz-tooltip</code> + <code>[data-tooltip]</code></td><td>宿主：相对定位 + 行内弹性；气泡由 <code>::after</code> 用 <code>attr()</code> 渲染</td></tr>
+        <tr><td><code>.zz-dropdown</code></td><td><code>&lt;details&gt;</code> 容器：相对定位，summary 去掉默认三角</td></tr>
+        <tr><td><code>.zz-dropdown__menu</code></td><td>菜单面板：绝对定位、<code>--zz-z-dropdown</code>、最小宽 10rem、<code>--zz-surface</code> 底</td></tr>
+        <tr><td><code>.zz-dropdown__item</code></td><td>菜单项：弹性行、内距 <code>0.375rem 0.625rem</code>、0.8125rem，悬停 <code>--zz-surface-2</code></td></tr>
+        <tr><td><code>.zz-dropdown__item--danger</code></td><td>危险项：<code>--zz-danger</code> 文字，悬停 12% 危险色底</td></tr>
+        <tr><td><code>.zz-dropdown__chev / .zz-dropdown__sep</code></td><td>展开时旋转 180° 的箭头；菜单里的分隔线</td></tr>
+        <tr><td><code>--zz-z-dropdown | --zz-z-modal | --zz-z-tooltip</code></td><td>200 / 300 / 400，浮层只能用这三个值</td></tr>
+        <tr><td><code>--zz-elevation</code></td><td>深色下是 1px 零模糊描边，亮色下补一层极轻投影</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <ul class="zz-doc__note">
+      <li>面板是 <code>role="dialog"</code> + <code>aria-modal="true"</code>，必须有可访问名称（<code>aria-label</code> 或可见标题）。</li>
+      <li>打开时焦点进入面板（优先 <code>[data-zz-modal-autofocus]</code>），Tab 在面板内循环；关闭后焦点回到触发按钮。</li>
+      <li>Esc 关闭最后打开的那一层；点遮罩关闭只在按下与抬起都落在遮罩上时生效，从面板里拖拽不会误关。</li>
+      <li><code>prefers-reduced-motion: reduce</code> 下去掉遮罩淡入与面板的 <code>scale(0.96)</code> 动画，只保留显隐切换。</li>
+      <li>提示气泡是纯 CSS 伪元素，读屏不保证播报；关键信息要写在可见文案或元素自身的 <code>aria-label</code> 里，气泡只做补充。</li>
+      <li>下拉菜单用原生 <code>&lt;details&gt;</code>，展开状态与键盘操作由浏览器提供，因此不要加 <code>role="menu"</code>；菜单项用真实的 <code>&lt;a&gt;</code> / <code>&lt;button&gt;</code>。</li>
+      <li>焦点环沿用全局 <code>:focus-visible</code>，浮层里也不要用 <code>outline: none</code> 抹掉。</li>
+    </ul>
+  </section>
+</Docs>

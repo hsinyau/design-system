@@ -1,0 +1,336 @@
+---
+import Docs from '@/layouts/Docs.astro'
+import Input from '@/components/ui/Input.astro'
+
+interface Swatch {
+  token: string
+  use: string
+}
+
+/** 面与线：四个层级 + 两种描边。 */
+const faces: Swatch[] = [
+  { token: '--zz-bg-deep', use: '凹槽：代码块、媒体井、页脚' },
+  { token: '--zz-bg', use: '页面地面：body、内容列' },
+  { token: '--zz-surface', use: '面板：卡片、弹层、表头' },
+  { token: '--zz-surface-2', use: '悬停面：hover 底色、当前项、行内 code' },
+  { token: '--zz-border-subtle', use: '发丝线：区块分隔、表格线' },
+  { token: '--zz-border-strong', use: '控件描边：输入框、描边按钮' },
+]
+
+/** 文字三级：三档实色，不用透明度派生。 */
+const textTiers: Swatch[] = [
+  { token: '--zz-text', use: '主文本：标题、当前项' },
+  { token: '--zz-text-secondary', use: '次级文本：正文、导航标签' },
+  { token: '--zz-text-muted', use: '弱文本：元信息、图注、占位符' },
+]
+
+/** 品牌与状态：brand 强调，状态色跨主题恒定。 */
+const signals: Swatch[] = [
+  { token: '--zz-brand', use: '强调色：主按钮填充、焦点环、链接下划线' },
+  { token: '--zz-brand-soft', use: 'brand 的 12% 透明版：选中底、当前项底' },
+  { token: '--zz-brand-ink', use: 'brand 填充上的文字色' },
+  { token: '--zz-danger', use: '危险：删除、错误' },
+  { token: '--zz-warning', use: '警告：注意、降级' },
+  { token: '--zz-success', use: '成功：完成、通过' },
+  { token: '--zz-info', use: '信息：提示、中性说明' },
+  { token: '--zz-accent', use: '点缀：次要分类标记' },
+]
+---
+
+<Docs title="颜色" description="zz design system 的颜色：面与线、文字三级、品牌与状态色。">
+  <span class="zz-doc__eyebrow">基础 / 色彩</span>
+  <h1 class="zz-doc__title">颜色</h1>
+  <p class="zz-doc__lede">
+    颜色的主体是 17 个 token，分三组：<strong>面与线</strong>承担层级，<strong>文字三级</strong>承担信息优先级，
+    <strong>品牌与状态</strong>承担语义。手写 CSS 一律引用 <code>var(--zz-*)</code>，不写死色值，也不引用
+    <code>--color-zz-*</code>（那是 Tailwind 工具类专用的 inline token，不保证作为运行时变量存在）。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>面与线</h2>
+    <p>
+      面从深到浅共四级，线有两种。色块背景即 token 的真实值，标签是 token 名与用途。
+    </p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-swatches">
+        {
+          faces.map((item) => (
+            <div class="zz-swatch">
+              <div class="zz-swatch__chip" style={`background: var(${item.token})`} />
+              <p class="zz-swatch__name"><code>{item.token}</code></p>
+              <p class="zz-swatch__use">{item.use}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+    <p class="zz-doc__note">
+      注意：深色主题里 <code>--zz-border-subtle</code> 与 <code>--zz-surface-2</code> 取同一个值，
+      所以发丝线落在悬停面上时几乎看不见——这是有意的，分隔线不该抢过交互反馈。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>层级用途链</h2>
+    <p>四级面按固定顺序使用，任何组件都从这条链上取面，不要自造中间色。</p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>层级</th><th>token</th><th>用途</th><th>典型位置</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>bg-deep</code></td>
+          <td><code>--zz-bg-deep</code></td>
+          <td>凹槽，比页面更深</td>
+          <td>代码块、媒体井、页脚、安装命令条</td>
+        </tr>
+        <tr>
+          <td><code>bg</code></td>
+          <td><code>--zz-bg</code></td>
+          <td>页面地面</td>
+          <td>body、内容列、半透明遮罩底</td>
+        </tr>
+        <tr>
+          <td><code>surface</code></td>
+          <td><code>--zz-surface</code></td>
+          <td>抬起的面板</td>
+          <td>卡片、弹层、表头、描边按钮底</td>
+        </tr>
+        <tr>
+          <td><code>surface-2</code></td>
+          <td><code>--zz-surface-2</code></td>
+          <td>再抬一级 = 交互悬停面</td>
+          <td>hover 底色、导航当前项、行内 code 底</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="zz-stage">
+      <div class="zz-well">
+        <p class="zz-well__label">surface · 面板</p>
+        <div class="zz-well__deep">
+          <code>bg-deep · 凹槽（代码块 / 媒体井）</code>
+        </div>
+        <div class="zz-well__hover">surface-2 · 悬停面</div>
+      </div>
+    </div>
+    <p class="zz-doc__note">面板底用 <code>--zz-surface</code>，凹槽用 <code>--zz-bg-deep</code>；两者嵌在页面 <code>--zz-bg</code> 之上。</p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>发丝线与控件描边</h2>
+    <p>
+      两种线各有明确职责，<strong>不要混用</strong>：分隔用 <code>--zz-border-subtle</code>，
+      控件轮廓用 <code>--zz-border-strong</code>。前者几乎不可见，只负责"分块"；后者必须能被看见，负责"这是一个可操作的东西"。
+    </p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-lines">
+        <div>
+          <p class="zz-lines__label">分隔：1px solid var(--zz-border-subtle)</p>
+          <div class="zz-lines__hairline">上面一行内容</div>
+          <div class="zz-lines__hairline">下面一行内容</div>
+        </div>
+        <div>
+          <p class="zz-lines__label">控件：1px solid var(--zz-border-strong)</p>
+          <div class="zz-lines__field">
+            <Input placeholder="输入框" aria-label="描边示例输入框" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="zz-doc__note">
+      清单：区块分隔、表格单元格、卡片内分隔、页脚顶线 → <code>border-subtle</code>；
+      输入框、Select、描边按钮、下拉面板外框 → <code>border-strong</code>。
+      强调容器用 <code>2px</code>，引用块左线用 <code>2px</code>（见「间距与层级」页的描边规范表）。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>文字三级</h2>
+    <p>三档都是独立挑选的实色，不是同一色的 alpha 派生——所以每一档在各自主题下的对比度都受控。</p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-swatches">
+        {
+          textTiers.map((item) => (
+            <div class="zz-swatch">
+              <div class="zz-swatch__chip" style={`background: var(${item.token})`} />
+              <p class="zz-swatch__name"><code>{item.token}</code></p>
+              <p class="zz-swatch__use">{item.use}</p>
+            </div>
+          ))
+        }
+      </div>
+      <div class="zz-textdemo">
+        <p class="zz-textdemo__primary">主文本：页面标题、当前项、正文里的强调</p>
+        <p class="zz-textdemo__secondary">次级文本：正文段落默认走这一档</p>
+        <p class="zz-textdemo__muted">弱文本：2026-10-15 · 4 分钟 · 1 个依赖</p>
+      </div>
+    </div>
+    <p class="zz-doc__note">
+      用色选择：正文 <code>--zz-text-secondary</code>，标题与需要抓住注意力的行 <code>--zz-text</code>，
+      元信息、日期、计数、占位符 <code>--zz-text-muted</code>。不要为了"弱一点"给文字叠透明度。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>品牌与状态</h2>
+    <p>
+      <code>--zz-brand</code> 是唯一强调色，只用在五处：主按钮填充、焦点环、链接下划线、进度条、当前项标记。
+      状态色取自固定色板，跨主题恒定，保证"红就是危险、绿就是成功"在任何主题下都成立。
+    </p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-swatches">
+        {
+          signals.map((item) => (
+            <div class="zz-swatch">
+              <div class="zz-swatch__chip" style={`background: var(${item.token})`} />
+              <p class="zz-swatch__name"><code>{item.token}</code></p>
+              <p class="zz-swatch__use">{item.use}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+    <p class="zz-doc__note">
+      <code>--zz-brand-soft</code> 是 brand 的 12% 透明版，由 <code>color-mix</code> 派生：
+      换主色时它自动跟着变，不需要手改。它是"选中底 / 当前项底"，不是描边色。
+    </p>
+    <pre class="zz-doc__code"><code>{`--zz-brand-soft: color-mix(in srgb, var(--zz-brand) 12%, transparent);`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>换主色</h2>
+    <p>
+      品牌色只落在两个 token 上。<strong>只改这两个值</strong>，其余全部自动跟随：焦点环、链接下划线、
+      <code>--zz-brand-soft</code>、滚动条交互态都引用 <code>var(--zz-brand)</code>。
+    </p>
+    <pre class="zz-doc__code"><code>{`/* 暗色主题：换成紫色主色 */
+:root,
+[data-theme='dark'] {
+  --zz-brand: oklch(0.72 0.17 300);
+  --zz-brand-ink: oklch(0.16 0.02 300);
+}
+
+/* 亮色主题：同一支，但明度更低、填充上的文字改成白 */
+[data-theme='light'] {
+  --zz-brand: oklch(0.52 0.15 300);
+  --zz-brand-ink: oklch(0.99 0.005 300);
+}`}</code></pre>
+    <p class="zz-doc__note">
+      <code>--zz-brand-ink</code> 是 brand 填充之上的文字色：亮色主色通常需要白色文字，深色主色需要近黑文字。
+      改完这两个值后，把这个页面和「按钮」页过一遍，确认焦点环在两种主题下都还看得见。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <ul class="zz-doc__note">
+      <li>文字只用三档实色，避免"叠加透明度后对比度不可控"；正文与背景的对比度取向见「动效与可访问性」页。</li>
+      <li>焦点环固定 <code>2px solid var(--zz-brand)</code> + <code>2px</code> 偏移，因此 brand 对背景的对比度需达到 3:1。</li>
+      <li>颜色从不单独承担语义：危险按钮同时有文案，当前项同时有 <code>aria-current</code>。</li>
+    </ul>
+  </section>
+
+  <style>
+    .zz-swatches {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    }
+
+    .zz-swatch__chip {
+      height: 3rem;
+      border: 1px solid var(--zz-border-subtle);
+    }
+
+    .zz-swatch__name,
+    .zz-swatch__use {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .zz-swatch__name {
+      margin-top: 0.5rem;
+      color: var(--zz-text);
+    }
+
+    .zz-swatch__use {
+      color: var(--zz-text-muted);
+    }
+
+    .zz-well {
+      border: 1px solid var(--zz-border-subtle);
+      background: var(--zz-surface);
+      padding: 1rem;
+    }
+
+    .zz-well__label,
+    .zz-lines__label {
+      color: var(--zz-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .zz-well__deep {
+      margin-top: 0.75rem;
+      background: var(--zz-bg-deep);
+      padding: 1rem;
+      color: var(--zz-text-secondary);
+      font-size: 0.8125rem;
+    }
+
+    .zz-well__hover {
+      margin-top: 0.75rem;
+      background: var(--zz-surface-2);
+      padding: 0.75rem 1rem;
+      color: var(--zz-text);
+      font-size: 0.8125rem;
+    }
+
+    .zz-lines {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    }
+
+    .zz-lines__hairline {
+      border-top: 1px solid var(--zz-border-subtle);
+      padding-block: 0.75rem;
+      color: var(--zz-text-secondary);
+      font-size: 0.8125rem;
+    }
+
+    .zz-lines__field {
+      margin-top: 0.75rem;
+      max-width: 16rem;
+    }
+
+    .zz-textdemo {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--zz-border-subtle);
+      padding-top: 1rem;
+    }
+
+    .zz-textdemo__primary {
+      color: var(--zz-text);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .zz-textdemo__secondary {
+      margin-top: 0.5rem;
+      color: var(--zz-text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .zz-textdemo__muted {
+      margin-top: 0.5rem;
+      color: var(--zz-text-muted);
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</Docs>

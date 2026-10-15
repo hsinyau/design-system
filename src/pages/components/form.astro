@@ -1,0 +1,405 @@
+---
+/**
+ * 组件 / 表单 —— 文本控件、选择器、勾选项与 Field 组合的文档页。
+ * 所有控件与按钮共用同一套尺寸阶梯，方便混排对齐。
+ */
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+import Field from '@/components/ui/Field.astro'
+import Input from '@/components/ui/Input.astro'
+import Textarea from '@/components/ui/Textarea.astro'
+import Select from '@/components/ui/Select.astro'
+import Checkbox from '@/components/ui/Checkbox.astro'
+import Radio from '@/components/ui/Radio.astro'
+import Switch from '@/components/ui/Switch.astro'
+
+const sizes = ['xs', 'sm', 'md', 'lg'] as const
+---
+
+<Docs title="表单" description="zz design system 的表单控件：输入框、文本域、选择器、勾选框、单选框与开关。">
+  <span class="zz-doc__eyebrow">组件 / 表单控件</span>
+  <h1 class="zz-doc__title">表单</h1>
+  <p class="zz-doc__lede">
+    控件是页面里的「凹槽」：底用 <code>--zz-bg-deep</code>，比页面更深一层，1px
+    <code>--zz-border-strong</code> 描边，与按钮的 <code>--zz-surface</code> 面明确区分。四个尺寸档位
+    与按钮严格等高，因此一行里输入框、选择器、按钮的上下边缘永远对齐。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>示例</h2>
+    <p>
+      一个最小可用的表单：每个字段由 <code>Field</code> 组合 label、控件与提示文案，错误文案落在最底，
+      出现错误时整块自动带上 <code>.zz-field--invalid</code>。
+    </p>
+    <div class="zz-stage zz-stage--plain" style="max-width: 32rem">
+      <form class="zz-stack" style="gap: 1.25rem">
+        <Field label="项目名称" for="demo-name" hint="会出现在侧栏与部署配置里。">
+          <Input
+            id="demo-name"
+            name="name"
+            placeholder="zz-design-system"
+            aria-describedby="demo-name-hint"
+          />
+        </Field>
+
+        <Field label="仓库地址" for="demo-repo" error="这个地址已被占用。">
+          <Input
+            id="demo-repo"
+            name="repo"
+            value="github.com/zz/design-system"
+            invalid
+            aria-describedby="demo-repo-error"
+          />
+        </Field>
+
+        <Field label="说明" for="demo-desc">
+          <Textarea
+            id="demo-desc"
+            name="desc"
+            rows={4}
+            placeholder="一句话描述这个项目。"
+          />
+        </Field>
+
+        <Field label="主题" for="demo-theme">
+          <Select id="demo-theme" name="theme" placeholder="选择一个主题">
+            <option value="tokyo-night">Tokyo Night</option>
+            <option value="flexoki">Flexoki</option>
+            <option value="catppuccin">Catppuccin</option>
+          </Select>
+        </Field>
+
+        <Checkbox name="terms" required>同意发布规范</Checkbox>
+
+        <Switch name="notify" checked>部署完成时通知我</Switch>
+
+        <div class="zz-row">
+          <Button type="submit">保存</Button>
+          <Button type="reset" variant="outline">重置</Button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>尺寸</h2>
+    <p>
+      高度 2 / 2.25 / 2.5 / 2.75rem（xs / sm / md / lg），横向内距 0.625rem（xs）与 0.75rem（其余）。
+      固定高度的控件不写纵向内距 —— 文字位置由 <code>height</code> 决定，写死纵向内距会在 xs 档裁字。
+      文本域的尺寸改由最小高度表达：4 / 4.5 / 5.5 / 6.5rem。
+    </p>
+    <div class="zz-stage">
+      {
+        sizes.map((size) => (
+          <div class="zz-row" style="margin-bottom: 0.75rem">
+            <div style="width: 11rem">
+              <Input size={size} placeholder={`${size} · 输入`} />
+            </div>
+            <div style="width: 11rem">
+              <Select size={size} placeholder={`${size} · 选择`}>
+                <option value="tokyo-night">Tokyo Night</option>
+              </Select>
+            </div>
+            <Button size={size} variant="outline">{size} · 按钮</Button>
+          </div>
+        ))
+      }
+      <div class="zz-row" style="align-items: flex-start">
+        {
+          sizes.map((size) => (
+            <div style="width: 11rem">
+              <Textarea size={size} placeholder={`${size} · 文本域`} />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>状态</h2>
+    <p>
+      悬停只把描边加深一档；聚焦把描边换成品牌色，外描边仍是全局的 2px 焦点环；无效态转
+      <code>--zz-danger</code>；禁用态压到 50% 不透明度并移除指针事件。文本类控件不做位移反馈 ——
+      缩放会让正在输入的文字抖动。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <div style="width: 11rem">
+          <Input placeholder="默认" />
+        </div>
+        <div style="width: 11rem">
+          <Input invalid value="无效" />
+        </div>
+        <div style="width: 11rem">
+          <Input disabled placeholder="禁用" />
+        </div>
+        <div style="width: 11rem">
+          <Input readonly value="只读" aria-label="只读示例" />
+        </div>
+      </div>
+      <div class="zz-row" style="align-items: flex-start; margin-top: 1rem">
+        <div style="width: 11rem">
+          <Select invalid placeholder="无效">
+            <option value="tokyo-night">Tokyo Night</option>
+          </Select>
+        </div>
+        <div style="width: 11rem">
+          <Select disabled placeholder="禁用">
+            <option value="tokyo-night">Tokyo Night</option>
+          </Select>
+        </div>
+        <div style="width: 11rem">
+          <Textarea invalid placeholder="无效文本域" rows={3} />
+        </div>
+        <div style="width: 11rem">
+          <Textarea disabled placeholder="禁用文本域" rows={3} />
+        </div>
+      </div>
+      <div class="zz-row" style="align-items: flex-start; margin-top: 1rem">
+        <div style="width: 20rem">
+          <Field
+            label="邮箱"
+            for="state-mail"
+            hint="用于接收构建失败通知。"
+            error="邮箱格式不正确。"
+          >
+            <Input
+              id="state-mail"
+              name="mail"
+              type="email"
+              value="zz@"
+              invalid
+              aria-describedby="state-mail-hint state-mail-error"
+            />
+          </Field>
+        </div>
+        <div style="width: 20rem">
+          <Field label="团队" for="state-team" hint="可以稍后在设置里修改。">
+            <Select id="state-team" name="team" placeholder="未选择" aria-describedby="state-team-hint">
+              <option value="core">核心组</option>
+              <option value="docs">文档组</option>
+            </Select>
+          </Field>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>勾选与开关</h2>
+    <p>
+      勾选框与单选框是 1rem 的直角方块，选中时填品牌色、勾与点用 <code>--zz-brand-ink</code>；
+      开关是 2.25 × 1.25rem 的直角轨道，滑块纯色，整条轨道只有一个 16px 的位移。三者内部都是真实
+      <code>&lt;input&gt;</code>，键盘与表单提交走原生行为。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <Checkbox name="cb-on" checked>已选中</Checkbox>
+        <Checkbox name="cb-off">未选中</Checkbox>
+        <Checkbox name="cb-mixed" indeterminate>部分选中</Checkbox>
+        <Checkbox name="cb-disabled" disabled>禁用</Checkbox>
+        <Checkbox name="cb-invalid" aria-invalid="true">必选项</Checkbox>
+      </div>
+
+      <fieldset class="zz-field" style="margin-top: 1.25rem">
+        <legend class="zz-field__label">部署目标</legend>
+        <div class="zz-row">
+          <Radio name="demo-target" value="edge" checked>边缘节点</Radio>
+          <Radio name="demo-target" value="node">Node 服务器</Radio>
+          <Radio name="demo-target" value="static">纯静态</Radio>
+          <Radio name="demo-target" value="off" disabled>不可选</Radio>
+        </div>
+      </fieldset>
+
+      <div class="zz-row" style="margin-top: 1.25rem">
+        <Switch name="sw-on" checked>已开启</Switch>
+        <Switch name="sw-off">已关闭</Switch>
+        <Switch name="sw-disabled" disabled>禁用</Switch>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>类名</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>类名</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>.zz-input</code></td>
+          <td>
+            文本控件底座（input / textarea / select 共用）：1px <code>--zz-border-strong</code> 描边、
+            <code>--zz-bg-deep</code> 凹槽底、等宽字体、150ms 过渡
+          </td>
+        </tr>
+        <tr>
+          <td><code>.zz-input--xs | sm | md | lg</code></td>
+          <td>高度 2 / 2.25 / 2.5 / 2.75rem，与按钮同阶梯；xs 横向内距 0.625rem，其余 0.75rem；lg 字号 0.9375rem</td>
+        </tr>
+        <tr>
+          <td><code>.zz-input--invalid</code> / <code>[aria-invalid='true']</code></td>
+          <td>描边转 <code>--zz-danger</code>；焦点态也保持危险色</td>
+        </tr>
+        <tr>
+          <td><code>.zz-textarea</code></td>
+          <td>纵向内距 0.625rem、行高 1.5、可纵向拉伸；尺寸改控制最小高度 4 / 4.5 / 5.5 / 6.5rem</td>
+        </tr>
+        <tr>
+          <td><code>.zz-select</code></td>
+          <td>选择器外层：相对定位，承载自绘箭头，class 也落在这里</td>
+        </tr>
+        <tr>
+          <td><code>.zz-select__control</code></td>
+          <td>原生 select：<code>appearance: none</code>、右侧留 2rem 箭头位、<code>cursor: pointer</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-select::after</code></td>
+          <td>自绘 1px 箭头：两条 1px 直角边旋转 45°，不依赖背景图与图片资源</td>
+        </tr>
+        <tr>
+          <td><code>.zz-select--xs</code></td>
+          <td>箭头内距收窄到 0.625rem（其余尺寸共用 0.75rem）</td>
+        </tr>
+        <tr>
+          <td><code>.zz-select--invalid</code> / <code>.zz-select--disabled</code></td>
+          <td>箭头转危险色 / 移除指针事件并把箭头压到 50%</td>
+        </tr>
+        <tr>
+          <td><code>.zz-field</code></td>
+          <td>纵向组合：label + 控件 + hint + 错误文案，间距 0.375rem；单选组可以直接放在 <code>&lt;fieldset&gt;</code> 上，<code>legend</code> 的下间距由 <code>.zz-field &gt; legend</code> 单独补（gap 对 legend 无效）</td>
+        </tr>
+        <tr>
+          <td><code>.zz-field__label</code></td>
+          <td>0.75rem，<code>--zz-text-secondary</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-field__required</code></td>
+          <td>必填星号，<code>--zz-danger</code>，带 <code>aria-hidden</code>（必填由控件自身的 <code>required</code> 表达）</td>
+        </tr>
+        <tr>
+          <td><code>.zz-field__hint</code></td>
+          <td>0.75rem，<code>--zz-text-muted</code>，空内容自动隐藏</td>
+        </tr>
+        <tr>
+          <td><code>.zz-field__error</code></td>
+          <td>错误文案：0.75rem，<code>--zz-danger</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-field--invalid</code></td>
+          <td>整块声明无效，内部控件统一转危险色描边</td>
+        </tr>
+        <tr>
+          <td><code>.zz-check</code> / <code>.zz-radio</code></td>
+          <td>
+            选项行：flex、0.5rem 间距、<code>user-select: none</code>、按下时视觉层 scale(0.96)；
+            <code>width: fit-content</code> 让行宽贴合内容，落在纵向 flex 里也不会被撑满整行
+          </td>
+        </tr>
+        <tr>
+          <td><code>.zz-check__input</code> / <code>.zz-radio__input</code> / <code>.zz-switch__input</code></td>
+          <td>真实 input：透明但保留焦点、键盘与表单行为</td>
+        </tr>
+        <tr>
+          <td><code>.zz-check__box</code></td>
+          <td>1rem 直角方块，底 <code>--zz-bg-deep</code>；选中填 <code>--zz-brand</code>，勾用 <code>--zz-brand-ink</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-radio__box</code></td>
+          <td>同上，但 50% 圆形（这套语言里唯一允许的圆角例外），选中态是品牌反色圆点</td>
+        </tr>
+        <tr>
+          <td><code>.zz-switch__track</code></td>
+          <td>2.25 × 1.25rem 直角轨道，底 <code>--zz-bg-deep</code>；选中填 <code>--zz-brand</code>（开关行同样 <code>width: fit-content</code>）</td>
+        </tr>
+        <tr>
+          <td><code>.zz-switch__thumb</code></td>
+          <td>0.875rem 纯色滑块，选中位移动 1rem 并转 <code>--zz-brand-ink</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-check--disabled</code> / <code>.zz-radio--disabled</code> / <code>.zz-switch--disabled</code></td>
+          <td><code>opacity: .5</code> + <code>pointer-events: none</code> + <code>cursor: not-allowed</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>token</h2>
+    <p>控件不新增变量：颜色全部来自主题 token，因此深色与亮色两套主题共用一份实现。</p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>token</th><th>用在哪</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>--zz-bg-deep</code></td><td>控件底、勾选框底、开关轨道底（凹槽）</td></tr>
+        <tr><td><code>--zz-border-strong</code></td><td>控件 1px 描边；悬停时与 <code>--zz-text</code> 混合一档加深</td></tr>
+        <tr><td><code>--zz-text</code></td><td>输入的文字、选项标签</td></tr>
+        <tr><td><code>--zz-text-muted</code></td><td>placeholder、选择器箭头、hint、关闭态滑块</td></tr>
+        <tr><td><code>--zz-text-secondary</code></td><td>label</td></tr>
+        <tr><td><code>--zz-brand</code></td><td>聚焦描边、选中填充、开关开启态轨道</td></tr>
+        <tr><td><code>--zz-brand-ink</code></td><td>选中态的勾、圆点与滑块</td></tr>
+        <tr><td><code>--zz-danger</code></td><td>无效描边、错误文案、必填星号</td></tr>
+        <tr><td><code>--zz-dur</code> / <code>--zz-ease</code></td><td>150ms 与统一缓动，只用在下列属性上</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>用法</h2>
+    <pre class="zz-doc__code"><code>{`---
+import Field from '@/components/ui/Field.astro'
+import Input from '@/components/ui/Input.astro'
+import Select from '@/components/ui/Select.astro'
+---
+
+<Field label="项目名称" for="name" hint="会出现在侧栏里。">
+  <Input id="name" name="name" size="md" placeholder="zz-design-system" aria-describedby="name-hint" />
+</Field>
+
+<Field label="主题" for="theme" error="必须选一个主题。">
+  <Select id="theme" name="theme" placeholder="选择一个主题">
+    <option value="tokyo-night">Tokyo Night</option>
+    <option value="flexoki">Flexoki</option>
+  </Select>
+</Field>`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <ul class="zz-doc__note">
+      <li>
+        label 与控件必须用 <code>for</code> / <code>id</code> 关联。<code>Field</code> 在给出
+        <code>for</code> 时会把 hint、错误文案的 id 推导为 <code>&lt;id&gt;-hint</code> 与
+        <code>&lt;id&gt;-error</code>，控件要自己挂上对应的 <code>aria-describedby</code>。
+      </li>
+      <li>
+        错误不要只靠颜色：同时给文案（错误文案插槽）与
+        <code>aria-invalid="true"</code>，屏幕阅读器才会播报。
+      </li>
+      <li>
+        单选框组用 <code>&lt;fieldset&gt;</code> + <code>&lt;legend&gt;</code>（或
+        <code>role="radiogroup"</code> + <code>aria-labelledby</code>），组内各项 <code>name</code> 相同。
+      </li>
+      <li>
+        勾选框、单选框、开关内部都是真实 <code>&lt;input&gt;</code>：空格与方向键、表单提交、
+        <code>required</code> 校验全部是原生行为；视觉层只负责画方块与勾，因此标记
+        <code>aria-hidden</code>。
+      </li>
+      <li>
+        全局的 2px 品牌色焦点环保留。勾选类控件的真实 input 是透明的，焦点环会被转发到视觉层
+        —— 这是让它可见，不是抹掉它。
+      </li>
+      <li>开关用 <code>role="switch"</code>，读屏会播报「开关 / 已打开」而不是「复选框」。</li>
+      <li>
+        禁用态只是视觉与指针层面（<code>opacity: .5</code> + <code>pointer-events: none</code>），
+        真正的禁用与校验仍由原生 <code>disabled</code> / <code>required</code> 属性承担。
+      </li>
+      <li>
+        <code>prefers-reduced-motion: reduce</code> 下所有过渡关闭，开关的位移瞬时完成、不做补间。
+      </li>
+      <li>placeholder 只作示例，不能替代 label。</li>
+    </ul>
+  </section>
+</Docs>

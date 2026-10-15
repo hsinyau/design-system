@@ -1,0 +1,153 @@
+---
+/**
+ * 文档站外壳：顶栏 + 侧栏 + 内容列 + 页脚。
+ * 主题在 <head> 里同步决定，避免首屏闪白。
+ */
+import { navGroups, siteName } from '@/lib/routes'
+import '../styles/index.css'
+
+interface Props {
+  title: string
+  description?: string
+}
+
+const { title, description = '' } = Astro.props
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/'
+---
+
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title === '概览' ? siteName : `${title} · ${siteName}`}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      ;(() => {
+        const stored = localStorage.getItem('zz-theme')
+        const system = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+        document.documentElement.dataset.theme = stored === 'light' || stored === 'dark' ? stored : system
+      })()
+    </script>
+  </head>
+  <body>
+    <header class="zz-topbar">
+      <div class="zz-topbar__bar">
+        <a class="zz-topbar__brand" href="/">
+          <span class="zz-topbar__mark" aria-hidden="true">zz</span>
+          <span>{siteName}</span>
+        </a>
+        <nav class="zz-topbar__nav" aria-label="主导航">
+          {
+            navGroups.map((group) => (
+              <a
+                class="zz-topbar__link"
+                href={group.items[0].href}
+                aria-current={
+                  group.items.some((item) =>
+                    item.href === '/' ? path === '/' : path.startsWith(item.href.split('/').slice(0, 2).join('/')),
+                  )
+                    ? 'page'
+                    : undefined
+                }
+              >
+                {group.title}
+              </a>
+            ))
+          }
+        </nav>
+        <div class="zz-topbar__actions">
+          <span class="zz-topbar__note">mono &amp; squared</span>
+          <button class="zz-btn zz-btn--ghost zz-btn--icon-sm" type="button" data-theme-toggle aria-label="切换深色或亮色主题">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.25"></circle>
+              <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="zz-subnav zz-shell" aria-label="页面导航">
+      {
+        navGroups
+          .flatMap((group) => group.items)
+          .map((item) => (
+            <a
+              class="zz-subnav__link"
+              href={item.href}
+              aria-current={path === item.href ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+      }
+    </nav>
+
+    <div class="zz-shell">
+      <aside class="zz-side">
+        {
+          navGroups.map((group) => (
+            <div class="zz-side__group">
+              <p class="zz-side__title">{group.title}</p>
+              <ul class="zz-side__list">
+                {group.items.map((item) => (
+                  <li>
+                    <a
+                      class="zz-side__link"
+                      href={item.href}
+                      aria-current={path === item.href ? 'page' : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </aside>
+
+      <main class="zz-main">
+        <slot />
+      </main>
+    </div>
+
+    <footer class="zz-footer">
+      <div class="zz-footer__inner">
+        <span>{siteName}</span>
+        <span aria-hidden="true">·</span>
+        <span>直角 · 等宽 · 1px 描边</span>
+        <span aria-hidden="true">·</span>
+        <span>灵感来自终端主题的界面语言</span>
+      </div>
+    </footer>
+
+    <script is:inline>
+      ;(() => {
+        const root = document.documentElement
+        const toggle = document.querySelector('[data-theme-toggle]')
+        if (!toggle) return
+
+        toggle.addEventListener('click', () => {
+          const next = root.dataset.theme === 'dark' ? 'light' : 'dark'
+          const apply = () => {
+            root.dataset.theme = next
+            localStorage.setItem('zz-theme', next)
+          }
+
+          const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+          if (reduced || typeof document.startViewTransition !== 'function') {
+            apply()
+            return
+          }
+
+          root.classList.add('zz-no-transitions')
+          const transition = document.startViewTransition(apply)
+          transition.finished.finally(() => root.classList.remove('zz-no-transitions'))
+        })
+      })()
+    </script>
+  </body>
+</html>

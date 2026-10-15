@@ -1,0 +1,207 @@
+---
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+import Card from '@/components/ui/Card.astro'
+import Badge from '@/components/ui/Badge.astro'
+import Kbd from '@/components/ui/Kbd.astro'
+import Avatar from '@/components/ui/Avatar.astro'
+import Stat from '@/components/ui/Stat.astro'
+---
+
+<Docs title="卡片" description="zz design system 的卡片与展示小件：1px 零模糊描边表达浮起，圆角恒为 0。">
+  <span class="zz-doc__eyebrow">组件 / 展示</span>
+  <h1 class="zz-doc__title">卡片</h1>
+  <p class="zz-doc__lede">
+    卡片是页面里最小的"面板"。它的浮起不是投影，而是 <code>box-shadow: var(--zz-elevation)</code>
+    给的 1px 零模糊描边；悬停只换 <code>--zz-elevation-hover</code>（同一几何、只改 alpha），
+    所以不会位移、也不会跳动。同族的徽章、键帽、头像、统计值共用这套面与线的规则。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>标准形态</h2>
+    <p>
+      媒体井是 16:9 的凹槽：<code>--zz-bg-deep</code> 底 + <code>outline: 1px solid var(--zz-img-outline)</code>
+      （<code>outline-offset: -1px</code>，内描边不占布局）。内容区固定 <code>1rem</code> 内距、
+      <code>0.375rem</code> 行距。标题 0.875rem sans 500 截断，描述 13px，元信息 0.75rem mono。
+    </p>
+    <div class="zz-stage zz-stage--deep">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card
+          title="Tokyo Night"
+          description="深色主题的基准：凹槽最深，面板抬一层，越靠交互越亮。"
+          meta="theme · tokyo-night"
+          href="/themes"
+        >
+          <svg slot="media" viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">
+            <rect width="160" height="90" fill="var(--zz-surface-2)"></rect>
+            <path
+              d="M0 90 60 30 105 75 160 35"
+              fill="none"
+              stroke="var(--zz-border-strong)"
+              stroke-width="1"
+              vector-effect="non-scaling-stroke"></path>
+          </svg>
+        </Card>
+        <Card title="全量 token" description="22 套主题共用的语义变量表，换主色只改一个块。" meta="22 themes">
+          <svg slot="media" viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">
+            <rect width="160" height="90" fill="var(--zz-surface-2)"></rect>
+            <path
+              d="M0 20 h160 M0 45 h160 M0 70 h160"
+              fill="none"
+              stroke="var(--zz-border-strong)"
+              stroke-width="1"
+              vector-effect="non-scaling-stroke"></path>
+          </svg>
+        </Card>
+        <Card
+          title="安装命令"
+          description="带操作的卡片：按钮放进 actions 槽，浮在整卡热区之上。"
+          meta="install"
+          href="/"
+        >
+          <svg slot="media" viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">
+            <rect width="160" height="90" fill="var(--zz-surface-2)"></rect>
+            <path
+              d="M16 62 60 26 M80 70 h64"
+              fill="none"
+              stroke="var(--zz-border-strong)"
+              stroke-width="1"
+              vector-effect="non-scaling-stroke"></path>
+          </svg>
+          <Fragment slot="actions">
+            <Button variant="outline" size="xs">复制</Button>
+            <Button size="xs" href="/">安装</Button>
+          </Fragment>
+        </Card>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>变体</h2>
+    <p>
+      变体可以叠加：<code>--plain</code> 关掉媒体井、<code>--tight</code> 把内距收到 0.75rem、
+      <code>--interactive</code> 悬停换 elevation、<code>--deep</code> 换成凹槽底。
+      传 <code>href</code> 的卡片整张都是热区，焦点环内缩 2px 画在卡片边缘。
+    </p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card variant="plain" title="plain" description="没有媒体井，内容区仍是 1rem 内距。" meta="variant: plain" />
+        <Card variant="tight" title="tight" description="内距收到 0.75rem，行距 0.25rem，适合密集列表。" meta="variant: tight" />
+        <Card
+          variant={['interactive', 'tight']}
+          title="interactive"
+          description="悬停把描边换成 elevation-hover，整卡可点。"
+          meta="variant: interactive · tight"
+          href="/components/card"
+        />
+        <Card variant="deep" title="deep" description="凹槽底，用在本身已经抬起的面板里面。" meta="variant: deep" />
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>徽章、键帽、头像、统计值</h2>
+    <p>
+      徽章 1.25rem 高、0.75rem mono；有底变体统一用 12% 的状态色底 + 状态色文字，带状态点时前置
+      0.375rem 圆点。键帽靠底部加厚 1px 描边表达"键"，没有投影。头像圆形的例外只此一处。
+    </p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-stack">
+        <div class="zz-row">
+          <Badge>默认</Badge>
+          <Badge variant="brand">brand</Badge>
+          <Badge variant="info">info</Badge>
+          <Badge variant="success" dot>在线</Badge>
+          <Badge variant="warning" dot>降级</Badge>
+          <Badge variant="danger" dot>离线</Badge>
+          <Badge variant="muted">muted</Badge>
+        </div>
+
+        <div class="zz-row">
+          <Kbd>K</Kbd>
+          <span>打开命令面板</span>
+          <span aria-hidden="true">·</span>
+          <Kbd>Ctrl</Kbd>
+          <Kbd>Shift</Kbd>
+          <Kbd>P</Kbd>
+        </div>
+
+        <div class="zz-row">
+          <Avatar size="sm" initials="zz" alt="zz" />
+          <Avatar size="md" initials="tn" alt="Tokyo Night" />
+          <Avatar size="lg" initials="kl" alt="Kanagawa Lotus" />
+          <Avatar size="xl" initials="om" alt="Omarchy" />
+        </div>
+
+        <div class="zz-row" style="gap:2.5rem;align-items:flex-end">
+          <Stat value="128" label="组件" />
+          <Stat value="0" unit="px" label="圆角半径" />
+          <Stat value="0.9375" unit="rem" label="正文字号" />
+          <Stat size="lg" value="1234" label="安装量" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>用法</h2>
+    <pre class="zz-doc__code"><code>{`---
+import Card from '@/components/ui/Card.astro'
+import Badge from '@/components/ui/Badge.astro'
+---
+
+<Card title="Tokyo Night" description="深色主题的基准。" meta="theme · tokyo-night" href="/themes">
+  <img slot="media" src="/themes/tokyo-night.png" alt="Tokyo Night 预览" />
+  <Fragment slot="actions">
+    <Button variant="outline" size="xs">复制</Button>
+  </Fragment>
+</Card>
+
+<Card variant={['interactive', 'tight']} title="紧凑可点" href="/docs" />
+<Card variant="plain" title="无媒体" description="内容区仍是 1rem 内距。" />
+
+<Badge variant="success" dot>在线</Badge>
+<Kbd>K</Kbd>
+<Avatar size="lg" initials="zz" alt="zz" />
+<Stat value="0" unit="px" label="圆角半径" />`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>类名与 token</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>类名</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.zz-card</code></td><td>面板底 <code>--zz-surface</code> + <code>box-shadow: var(--zz-elevation)</code>，<code>overflow: hidden</code> 裁住媒体井</td></tr>
+        <tr><td><code>.zz-card__media</code></td><td>16:9 媒体井：<code>--zz-bg-deep</code> 底 + <code>--zz-img-outline</code> 的 1px 内描边</td></tr>
+        <tr><td><code>.zz-card__body</code></td><td>内容区：<code>1rem</code> 内距 + <code>0.375rem</code> 行距，纵向撑满卡片</td></tr>
+        <tr><td><code>.zz-card__title</code></td><td>0.875rem sans 500、单行截断，色 <code>--zz-text</code></td></tr>
+        <tr><td><code>.zz-card__desc</code></td><td>13px / 1.6，色 <code>--zz-text-secondary</code>，最多两行</td></tr>
+        <tr><td><code>.zz-card__meta</code></td><td>0.75rem mono <code>--zz-text-muted</code> + <code>tabular-nums</code></td></tr>
+        <tr><td><code>.zz-card__actions</code></td><td>卡内操作区：<code>position: relative</code>，靠 DOM 顺序（在热区之后）拿到点击，并被推到卡底；不引入 z-index</td></tr>
+        <tr><td><code>.zz-card__link</code></td><td>标题里的链接，继承文字色、去下划线</td></tr>
+        <tr><td><code>.zz-card__hotzone</code></td><td><code>position: absolute; inset: 0</code>，把点击面铺满整卡</td></tr>
+        <tr><td><code>.zz-card__ring</code></td><td>焦点环载体：<code>outline-offset: -2px</code>，避免被卡片自身的 <code>overflow: hidden</code> 裁掉</td></tr>
+        <tr><td><code>.zz-card--plain | --tight | --interactive | --deep</code></td><td>无媒体 / 0.75rem 内距 / 悬停换 <code>--zz-elevation-hover</code> / 凹槽底</td></tr>
+        <tr><td><code>.zz-badge</code> + <code>--brand | --danger | --warning | --success | --info | --muted</code></td><td>1.25rem 高的标签；基础态无底 + <code>--zz-border-subtle</code> 描边，有底变体走 12% 状态色</td></tr>
+        <tr><td><code>.zz-badge__dot</code></td><td>0.375rem 状态点，取 <code>currentColor</code>，随变体自动换色</td></tr>
+        <tr><td><code>.zz-kbd</code></td><td><code>--zz-border-strong</code> 描边 + 底部加厚到 2px，0.6875rem，底 <code>--zz-surface-2</code></td></tr>
+        <tr><td><code>.zz-avatar</code> + <code>--sm | --md | --lg | --xl</code></td><td>1.5 / 2 / 2.5 / 3rem 圆形，底 <code>--zz-surface-2</code>，描边 <code>--zz-border-subtle</code></td></tr>
+        <tr><td><code>.zz-stat</code> + <code>--lg</code></td><td>统计值：1.75 / 2.25rem sans 600 + <code>tabular-nums</code>，单位与标签 0.75rem mono</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <ul class="zz-doc__note">
+      <li>整卡热区是标题里的那个 <code>&lt;a&gt;</code>，所以读屏与键盘用户拿到的就是一个有名字的链接；点击面由 <code>aria-hidden</code> 的覆盖层负责，不产生重复的可聚焦元素。</li>
+      <li>焦点环画在内缩 2px 的 <code>.zz-card__ring</code> 上；卡片 <code>overflow: hidden</code>，外扩的环会被裁掉，所以这里不能用全局的 <code>outline-offset: 2px</code>。</li>
+      <li>卡内有按钮时放进 <code>actions</code> 槽，否则会被热区盖住点不到；热区是覆盖层，不会改变 DOM 顺序。</li>
+      <li>头像没有图片时用 <code>role="img"</code> + <code>aria-label</code> 提供名字，首字母本身对读屏隐藏；有图片时 <code>alt</code> 直接透传，纯装饰头像请传 <code>alt=""</code>。</li>
+      <li>徽章的语义色不承担唯一信息：<code>--danger</code> / <code>--success</code> 都配了文字，状态点只是加速扫读。</li>
+    </ul>
+  </section>
+</Docs>

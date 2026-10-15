@@ -1,0 +1,259 @@
+---
+import Docs from '@/layouts/Docs.astro'
+---
+
+<Docs title="表格" description="zz design system 的表格：表头用面板底 + 控件级下描边，行分隔退回发丝线。">
+  <span class="zz-doc__eyebrow">组件 / 展示</span>
+  <h1 class="zz-doc__title">表格</h1>
+  <p class="zz-doc__lede">
+    表格只用两种线：表头下沿是控件级的 <code>1px solid var(--zz-border-strong)</code>，行与行之间退回发丝线
+    <code>--zz-border-subtle</code>。表头文字回到 sans 600，数字列右对齐并且开
+    <code>tabular-nums</code>，位数才能对齐。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>基本表格</h2>
+    <p>
+      单元格内距 <code>0.5rem 0.75rem</code>，表头底是 <code>--zz-surface</code>。行头用
+      <code>&lt;th scope="row"&gt;</code>，它比普通单元格更亮但不加粗，避免和表头抢注意力。
+    </p>
+    <div class="zz-table-wrap zz-scroll">
+      <table class="zz-table">
+        <caption>面与线的层级（深色主题取值）</caption>
+        <thead>
+          <tr>
+            <th scope="col">token</th>
+            <th scope="col">层级</th>
+            <th scope="col">用在哪里</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><code>--zz-bg-deep</code></th>
+            <td>凹槽</td>
+            <td>代码块、媒体井、页脚</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>--zz-bg</code></th>
+            <td>页面</td>
+            <td>body 地面色</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>--zz-surface</code></th>
+            <td>面板</td>
+            <td>卡片、表头、面板底</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>--zz-surface-2</code></th>
+            <td>交互面</td>
+            <td>悬停底、键帽、行内 code</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>--zz-border-strong</code></th>
+            <td>控件描边</td>
+            <td>输入框、描边按钮、表头下沿</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>数字列</h2>
+    <p>
+      数字列加 <code>.zz-table__num</code>：右对齐 + <code>tabular-nums</code>。表格整体也开了
+      <code>tabular-nums</code>，四处数字不会因字宽不同而抖动。
+    </p>
+    <div class="zz-table-wrap zz-scroll">
+      <table class="zz-table">
+        <thead>
+          <tr>
+            <th scope="col">主题</th>
+            <th scope="col" class="zz-table__num">token 数</th>
+            <th scope="col" class="zz-table__num">体积 / KB</th>
+            <th scope="col" class="zz-table__num">对比度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Tokyo Night</th>
+            <td class="zz-table__num">22</td>
+            <td class="zz-table__num">1.8</td>
+            <td class="zz-table__num">11.4</td>
+          </tr>
+          <tr>
+            <th scope="row">Kanagawa Lotus</th>
+            <td class="zz-table__num">22</td>
+            <td class="zz-table__num">2.1</td>
+            <td class="zz-table__num">12.9</td>
+          </tr>
+          <tr>
+            <th scope="row">Flexoki Light</th>
+            <td class="zz-table__num">22</td>
+            <td class="zz-table__num">2.4</td>
+            <td class="zz-table__num">14.2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>变体</h2>
+    <p>
+      <code>--tight</code> 把内距收成 <code>0.25rem 0.5rem</code>，适合长清单；<code>--striped</code>
+      给偶数行铺 <code>--zz-surface-2</code>；<code>--bordered</code> 打开全网格线，用于密集的对照表。
+    </p>
+    <div class="zz-stack">
+      <div class="zz-table-wrap zz-scroll">
+        <table class="zz-table zz-table--tight">
+          <caption>--tight</caption>
+          <thead>
+            <tr><th scope="col">尺寸</th><th scope="col" class="zz-table__num">高度</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">xs</th><td class="zz-table__num">2rem</td></tr>
+            <tr><th scope="row">sm</th><td class="zz-table__num">2.25rem</td></tr>
+            <tr><th scope="row">md</th><td class="zz-table__num">2.5rem</td></tr>
+            <tr><th scope="row">lg</th><td class="zz-table__num">2.75rem</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="zz-table-wrap zz-scroll">
+        <table class="zz-table zz-table--striped">
+          <caption>--striped</caption>
+          <thead>
+            <tr><th scope="col">形态</th><th scope="col">浮起</th><th scope="col">圆角</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">卡片</th><td><code>--zz-elevation</code></td><td>0</td></tr>
+            <tr><th scope="row">按钮</th><td>1px 描边</td><td>0</td></tr>
+            <tr><th scope="row">表单控件</th><td>1px 描边</td><td>0</td></tr>
+            <tr><th scope="row">头像</th><td>1px 描边</td><td>50%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="zz-table-wrap zz-scroll">
+        <table class="zz-table zz-table--bordered">
+          <caption>--bordered</caption>
+          <thead>
+            <tr><th scope="col">token</th><th scope="col">深色主题</th><th scope="col">亮色主题</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row"><code>--zz-text</code></th><td>浅蓝白</td><td>近黑</td></tr>
+            <tr><th scope="row"><code>--zz-text-secondary</code></th><td>灰蓝</td><td>深灰</td></tr>
+            <tr><th scope="row"><code>--zz-text-muted</code></th><td>暗灰蓝</td><td>中灰</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>横向溢出</h2>
+    <p>
+      列多的时候不要压窄单元格，把表格包进
+      <code>&lt;div class="zz-table-wrap zz-scroll"&gt;</code>：前者给 <code>overflow-x: auto</code>，
+      后者（来自 <code>base.css</code>）给细滚动条。
+    </p>
+    <div class="zz-table-wrap zz-scroll">
+      <table class="zz-table">
+        <caption>宽度不够时横向滚动，表头不折行</caption>
+        <thead>
+          <tr>
+            <th scope="col">token</th>
+            <th scope="col">层级</th>
+            <th scope="col">深色主题</th>
+            <th scope="col">亮色主题</th>
+            <th scope="col">用在哪里</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><code>--zz-brand</code></th>
+            <td>强调</td>
+            <td>青柠绿</td>
+            <td>靛蓝</td>
+            <td>主按钮填充、焦点环、链接下划线</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>--zz-brand-soft</code></th>
+            <td>强调 12%</td>
+            <td>color-mix 派生</td>
+            <td>color-mix 派生</td>
+            <td>brand 徽章底，随主色自动变化</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>--zz-elevation-hover</code></th>
+            <td>浮起（悬停）</td>
+            <td>1px 描边，alpha 升到 .13</td>
+            <td>1px 描边 + 两层极轻投影</td>
+            <td>交互卡片、可点列表项的悬停态</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>--zz-selection</code></th>
+            <td>选中</td>
+            <td>深紫灰</td>
+            <td>暖灰</td>
+            <td><code>::selection</code> 底色</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>用法</h2>
+    <pre class="zz-doc__code"><code>{`<div class="zz-table-wrap zz-scroll">
+  <table class="zz-table zz-table--striped">
+    <caption>面与线的层级</caption>
+    <thead>
+      <tr>
+        <th scope="col">token</th>
+        <th scope="col" class="zz-table__num">用量</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row"><code>--zz-surface</code></th>
+        <td class="zz-table__num">38</td>
+      </tr>
+    </tbody>
+  </table>
+</div>`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>类名与 token</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>类名</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.zz-table</code></td><td>基础表格：<code>border-collapse: collapse</code>、0.8125rem、整体 <code>tabular-nums</code></td></tr>
+        <tr><td><code>.zz-table caption</code></td><td>表题：0.75rem mono <code>--zz-text-muted</code>，左对齐放在表上方</td></tr>
+        <tr><td><code>.zz-table thead th</code></td><td>sans 600、底 <code>--zz-surface</code>、下边框 <code>--zz-border-strong</code>、不折行</td></tr>
+        <tr><td><code>.zz-table tbody th | td</code></td><td>内距 <code>0.5rem 0.75rem</code>，行分隔 <code>--zz-border-subtle</code>（末行去掉）</td></tr>
+        <tr><td><code>.zz-table tbody th</code></td><td>行头：色 <code>--zz-text</code>、字重 500</td></tr>
+        <tr><td><code>.zz-table__num</code></td><td>数字列：右对齐 + <code>tabular-nums</code></td></tr>
+        <tr><td><code>.zz-table--tight</code></td><td>内距 <code>0.25rem 0.5rem</code></td></tr>
+        <tr><td><code>.zz-table--striped</code></td><td>偶数行铺 <code>--zz-surface-2</code></td></tr>
+        <tr><td><code>.zz-table--bordered</code></td><td>全网格线：单元格 <code>--zz-border-subtle</code>，外框与表头 <code>--zz-border-strong</code></td></tr>
+        <tr><td><code>.zz-table-wrap</code></td><td><code>overflow-x: auto</code>；和 <code>base.css</code> 的 <code>.zz-scroll</code> 一起用得到细滚动条</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <ul class="zz-doc__note">
+      <li>一律用真的 <code>&lt;table&gt;</code>，不要用 grid 拼视觉表格：读屏靠表格结构播报行列关系。</li>
+      <li>每个 <code>&lt;th&gt;</code> 都要有 <code>scope</code>：列头 <code>scope="col"</code>、行头 <code>scope="row"</code>。</li>
+      <li>表题用 <code>&lt;caption&gt;</code>（视觉上就是表上方那行 mono 小字），它同时是表格的无障碍名称。</li>
+      <li><code>thead</code> 里的表头加 <code>white-space: nowrap</code>，滚动时表头不会折成两行造成误读；溢出交给外层滚动容器。</li>
+      <li>横向滚动容器要能用键盘滚到底：不要在 <code>.zz-table-wrap</code> 上加 <code>tabindex="-1"</code> 之类的"静音"属性。</li>
+    </ul>
+  </section>
+</Docs>

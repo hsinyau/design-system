@@ -1,0 +1,357 @@
+---
+/**
+ * 组件 / 导航 —— 吸顶栏、侧栏、标签条、面包屑、分页的文档页。
+ * 五个组件共用一条原则：状态只用 1px 描边、导轨和文字色表达，
+ * 不位移、不加影，因此切换时没有任何布局跳动。
+ */
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+import Navbar from '@/components/ui/Navbar.astro'
+import Sidenav from '@/components/ui/Sidenav.astro'
+import Tabs from '@/components/ui/Tabs.astro'
+import Breadcrumb from '@/components/ui/Breadcrumb.astro'
+import Pagination from '@/components/ui/Pagination.astro'
+
+const sidenavGroups = [
+  {
+    title: '开始',
+    items: [
+      { href: '/', label: '概览' },
+      { href: '/foundations/color', label: '颜色' },
+    ],
+  },
+  {
+    title: '组件',
+    items: [
+      { href: '/components/button', label: '按钮' },
+      { href: '/components/nav', label: '导航', current: true },
+      { href: '/components/table', label: '表格' },
+    ],
+  },
+]
+
+const crumbs = [
+  { href: '/', label: '首页' },
+  { href: '/components/nav', label: '组件' },
+  { label: '导航' },
+]
+
+const tabItems = [
+  { id: 'overview', label: '概览', selected: true },
+  { id: 'classes', label: '类名', selected: false },
+  { id: 'states', label: '状态', selected: false },
+  { id: 'keys', label: '键盘', selected: false },
+]
+---
+
+<Docs title="导航" description="zz design system 的导航类组件：吸顶栏、侧栏、标签条、面包屑与分页。">
+  <span class="zz-doc__eyebrow">组件 / 导航</span>
+  <h1 class="zz-doc__title">导航</h1>
+  <p class="zz-doc__lede">
+    导航族的全部状态都由 1px 描边、一条竖导轨和文字色承担：当前项既换颜色也换导轨，
+    因此「我在哪」不是只靠颜色说的。吸顶栏是全站唯一抬到 <code>--zz-z-nav</code> 的成员；
+    标签条的选中下划线用 inset 阴影画，阴影不占盒模型，所以切换时没有 1px 的跳动。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>吸顶栏</h2>
+    <p>
+      栏体是 <code>position: sticky; top: 0</code>，底为 90% 的 <code>--zz-bg</code> 再叠
+      12px 模糊：滚过的内容透得出来但读不清。下边线是 1px <code>--zz-border-subtle</code>，
+      所以它不靠阴影也能和内容分层。下面这段舞台是可滚动的，滚一下就看得见效果。
+    </p>
+    <div class="zz-stage zz-stage--plain" style="padding: 0; isolation: isolate">
+      <div style="max-height: 13rem; overflow-y: auto">
+        <Navbar label="示例主导航">
+          <a slot="brand" class="zz-navbar__brand" href="/">
+            <span class="zz-navbar__mark" aria-hidden="true">zz</span>
+            <span>design system</span>
+          </a>
+          <a class="zz-navbar__link" href="/">概览</a>
+          <a class="zz-navbar__link" href="/foundations/color">基础</a>
+          <a class="zz-navbar__link" href="/components/nav" aria-current="page">组件</a>
+          <a class="zz-navbar__link" href="/themes">主题</a>
+          <Button slot="actions" variant="outline" size="sm">文档</Button>
+        </Navbar>
+        <div style="padding: 1rem">
+          <p style="color: var(--zz-text-secondary); font-size: 0.875rem; line-height: 1.65">
+            向下滚动这段内容，栏体会一直吸在顶部。当前页的链接是
+            <code>aria-current="page"</code>，它的底换成 <code>--zz-surface-2</code>、文字换成
+            <code>--zz-text</code> —— 和悬停同一套表现，因此指针停在哪都不会误读成「我在这」。
+          </p>
+          <p style="margin-top: 0.75rem; color: var(--zz-text-muted); font-size: 0.8125rem">
+            栏体内的元素：字标 0.875rem，链接 0.8125rem 高 2rem，横向内距 0.625rem。
+          </p>
+          <p style="margin-top: 0.75rem; color: var(--zz-text-muted); font-size: 0.8125rem">
+            内层最大宽 72rem，横向内距 1rem，40rem 起 1.5rem —— 与页面容器同一条轴。
+          </p>
+          <p style="margin-top: 0.75rem; color: var(--zz-text-muted); font-size: 0.8125rem">
+            窄屏不折叠菜单，标签带自己横向滚动：比藏进抽屉少一次交互，也不会丢掉当前项。
+          </p>
+          <p style="margin-top: 0.75rem; color: var(--zz-text-muted); font-size: 0.8125rem">
+            这块舞台加了 <code>isolation: isolate</code>：栏体是 <code>--zz-z-nav</code>，不隔离的话
+            它会和文档站的顶栏同级抢绘制顺序。把组件放进可滚动的局部容器时，照做。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>侧栏</h2>
+    <p>
+      每个链接自带 1px <code>border-inline-start</code>，首尾相接成一条连续导轨；当前项把导轨和
+      文字一起换成 <code>--zz-brand</code>，不加底也不加粗。分组标题是 0.625rem 的大写 eyebrow，
+      不参与导轨。
+    </p>
+    <div class="zz-stage" style="max-width: 16rem">
+      <Sidenav groups={sidenavGroups} label="示例侧栏" />
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>标签条</h2>
+    <p>
+      标签条本身是横向可滚动的一行，底部一条 1px 分隔线。选中态是
+      <code>box-shadow: inset 0 -2px 0 var(--zz-brand)</code>，未选中时留着同样几何的透明阴影占位，
+      所以来回切标签不会让整行抖 1px。用左 / 右箭头（或 Home / End）切换。
+    </p>
+    <div class="zz-stage">
+      <Tabs label="示例标签条">
+        {
+          tabItems.map((tab) => (
+            <button
+              class="zz-tabs__tab"
+              type="button"
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-controls={`panel-${tab.id}`}
+              aria-selected={tab.selected ? 'true' : 'false'}
+              tabindex={tab.selected ? 0 : -1}
+            >
+              {tab.label}
+            </button>
+          ))
+        }
+      </Tabs>
+      <div class="zz-tabs__panel" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" tabindex="0">
+        标签条只负责切换，不负责布局：把面板放在标签条外面，面板就能占满整栏宽度。
+      </div>
+      <div class="zz-tabs__panel" role="tabpanel" id="panel-classes" aria-labelledby="tab-classes" tabindex="0">
+        <code>.zz-tabs</code> 是标签条，<code>.zz-tabs__tab</code> 是每个标签，
+        <code>.zz-tabs__panel</code> 是面板。
+      </div>
+      <div class="zz-tabs__panel" role="tabpanel" id="panel-states" aria-labelledby="tab-states" tabindex="0">
+        悬停只把文字提到 <code>--zz-text</code>；选中是品牌色文字 + 2px 品牌色下划线；禁用压到 50% 并移除指针事件。
+      </div>
+      <div class="zz-tabs__panel" role="tabpanel" id="panel-keys" aria-labelledby="tab-keys" tabindex="0">
+        左 / 右箭头在标签之间移动焦点并顺带选中，Home / End 跳到首尾；面板自身可聚焦，长内容能用方向键滚动。
+      </div>
+    </div>
+    <p>
+      脚本是渐进增强：无 JS 时标签条不能切换，但所有面板都还在 DOM 里、读起来是完整的；
+      面板的 <code>hidden</code> 由脚本补上，不要在标记里写死，否则关掉 JS 就只剩第一个面板。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>面包屑</h2>
+    <p>
+      0.75rem 的等宽行：分隔符是 <code>--zz-text-muted</code>，路径项是
+      <code>--zz-text-secondary</code>，末项用 <code>--zz-text</code> 并带
+      <code>aria-current="page"</code>。末项永远是不可点击的纯文本。
+    </p>
+    <div class="zz-stage">
+      <Breadcrumb items={crumbs} />
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>分页</h2>
+    <p>
+      页码是 2.25rem 的正方形，观感沿用 <code>.zz-btn--outline</code> + <code>.zz-btn--icon-sm</code>：
+      1px <code>--zz-border-strong</code> 描边、<code>--zz-surface</code> 底。当前页填
+      <code>--zz-brand</code>、文字 <code>--zz-brand-ink</code>；两端是上一页 / 下一页。
+      超过 7 页时折叠成 <code>1 … 4 5 6 … 12</code>，省略号与页码同宽，数字列始终对齐。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-stack">
+        <Pagination page={5} total={12} hrefFor={(n) => `/components/nav?page=${n}`} />
+        <Pagination page={1} total={4} />
+      </div>
+    </div>
+    <p>
+      第二例停在第 1 页，「上一页」渲染成不透明度 50% 的不可聚焦文本，而不是指向自己的死链。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>用法</h2>
+    <pre class="zz-doc__code"><code>{`---
+import Navbar from '@/components/ui/Navbar.astro'
+import Sidenav from '@/components/ui/Sidenav.astro'
+import Button from '@/components/ui/Button.astro'
+---
+
+<Navbar label="主导航">
+  <a slot="brand" class="zz-navbar__brand" href="/">
+    <span class="zz-navbar__mark" aria-hidden="true">zz</span>
+    <span>design system</span>
+  </a>
+  <a class="zz-navbar__link" href="/">概览</a>
+  <a class="zz-navbar__link" href="/components/nav" aria-current="page">组件</a>
+  <Button slot="actions" variant="outline" size="sm">文档</Button>
+</Navbar>
+
+<Sidenav
+  groups={[
+    { title: '组件', items: [{ href: '/components/nav', label: '导航', current: true }] },
+  ]}
+  label="侧栏导航"
+/>`}</code></pre>
+
+    <pre class="zz-doc__code"><code>{`---
+import Tabs from '@/components/ui/Tabs.astro'
+import Breadcrumb from '@/components/ui/Breadcrumb.astro'
+import Pagination from '@/components/ui/Pagination.astro'
+---
+
+<Tabs label="示例标签条">
+  <button class="zz-tabs__tab" type="button" role="tab" id="tab-a"
+          aria-controls="panel-a" aria-selected="true">甲</button>
+  <button class="zz-tabs__tab" type="button" role="tab" id="tab-b"
+          aria-controls="panel-b" aria-selected="false" tabindex="-1">乙</button>
+</Tabs>
+<div class="zz-tabs__panel" role="tabpanel" id="panel-a" aria-labelledby="tab-a" tabindex="0">…</div>
+<div class="zz-tabs__panel" role="tabpanel" id="panel-b" aria-labelledby="tab-b" tabindex="0">…</div>
+
+<Breadcrumb items={[{ href: '/', label: '首页' }, { label: '导航' }]} />
+
+<Pagination page={5} total={12} hrefFor={(n) => '/components/nav?page=' + n} />`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>类名与 token</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>类名</th><th>作用</th><th>token</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>.zz-navbar</code></td>
+          <td>吸顶栏：sticky、下边线、90% 地面色 + 12px 模糊</td>
+          <td><code>--zz-z-nav</code> <code>--zz-bg</code> <code>--zz-border-subtle</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-navbar__bar</code></td>
+          <td>内层：高 <code>--zz-nav-h</code>、最大宽 72rem、横向内距 1rem（40rem 起 1.5rem）</td>
+          <td><code>--zz-nav-h</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-navbar__link</code></td>
+          <td>0.8125rem 链接，高 2rem；悬停出 <code>--zz-surface-2</code> 底，<code>aria-current="page"</code> 同色并提亮文字</td>
+          <td><code>--zz-surface-2</code> <code>--zz-text-secondary</code> <code>--zz-text</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-navbar__brand</code> / <code>__mark</code></td>
+          <td>左端字标；mark 是 1.5rem 的品牌色方块</td>
+          <td><code>--zz-brand</code> <code>--zz-brand-ink</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-navbar__nav</code> / <code>__actions</code></td>
+          <td>标签带（窄屏横向滚动，焦点环内缩 2px）/ 右端操作组（自动靠右）</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><code>.zz-sidenav__link</code></td>
+          <td>竖排链接：1px 导轨 + 0.3125rem / 0.75rem 内距；当前项导轨与文字变品牌色</td>
+          <td><code>--zz-border-subtle</code> <code>--zz-brand</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-sidenav__title</code></td>
+          <td>0.625rem 大写分组标题，不参与导轨</td>
+          <td><code>--zz-text-muted</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-tabs</code></td>
+          <td>标签条容器：横向、可滚动、底部 1px 分隔线</td>
+          <td><code>--zz-border-subtle</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-tabs__tab</code></td>
+          <td>2.25rem 高标签；悬停提亮文字；<code>aria-selected="true"</code> 时 inset 2px 品牌色下划线 + 品牌色文字</td>
+          <td><code>--zz-brand</code> <code>--zz-text</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-tabs__panel</code></td>
+          <td>面板：上内距 1rem，0.875rem 次级正文</td>
+          <td><code>--zz-text-secondary</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-breadcrumb</code> / <code>__list</code></td>
+          <td>0.75rem 路径行，可换行，间距 0.5rem</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><code>.zz-breadcrumb__link</code> / <code>__sep</code></td>
+          <td>路径项次级色、悬停提亮；<code>aria-current="page"</code> 用 <code>--zz-text</code>；分隔符是 muted</td>
+          <td><code>--zz-text-secondary</code> <code>--zz-text</code> <code>--zz-text-muted</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-pagination__item</code></td>
+          <td>2.25rem 方形页码；当前页品牌填充 + <code>--zz-brand-ink</code> 文字；<code>aria-disabled</code> 压到 50%</td>
+          <td><code>--zz-border-strong</code> <code>--zz-surface</code> <code>--zz-brand</code> <code>--zz-brand-ink</code></td>
+        </tr>
+        <tr>
+          <td><code>.zz-pagination__gap</code></td>
+          <td>省略号占位，与页码同宽</td>
+          <td><code>--zz-text-muted</code></td>
+        </tr>
+        <tr>
+          <td>通用</td>
+          <td>所有过渡都是 <code>var(--zz-dur) var(--zz-ease)</code>，只列需要过渡的属性</td>
+          <td><code>--zz-dur</code> <code>--zz-ease</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <ul class="zz-doc__note">
+      <li>
+        当前项一律是 <code>aria-current="page"</code>，视觉只是它的结果；读屏用户听到的是同一件事，
+        颜色永远不是唯一的信号。
+      </li>
+      <li>
+        吸顶栏与侧栏都是带 <code>aria-label</code> 的 <code>&lt;nav&gt;</code>；一页里出现多个
+        <code>&lt;nav&gt;</code> 时名称不能省，否则读屏的跳转列表里全是「导航」。
+      </li>
+      <li>
+        标签条用 <code>role="tablist"</code> / <code>role="tab"</code> / <code>role="tabpanel"</code>
+        三件套：<code>aria-selected</code> 报选中，<code>aria-controls</code> 与
+        <code>aria-labelledby</code> 把标签和面板连起来，面板自身 <code>tabindex="0"</code> 便于键盘滚动。
+      </li>
+      <li>
+        roving tabindex：只有选中的标签是 <code>tabindex="0"</code>，其余是 <code>-1</code>。
+        因此 Tab 键一次就离开标签条进入面板，标签之间用左 / 右箭头（Home / End 跳首尾），
+        焦点会跟着选中一起走。
+      </li>
+      <li>
+        分页在边界处渲染成不可聚焦的 <code>&lt;span aria-disabled="true"&gt;</code>：既不是死链，
+        也不会让键盘撞进一个按不动的元素。省略号 <code>aria-hidden</code>，读屏只听到页码。
+      </li>
+      <li>
+        <code>:active</code> 用 <code>scale(0.96)</code> 而非位移：标签与页码这类按钮型控件有按下反馈，
+        纯文字链接（栏体链接、侧栏、面包屑）不缩放 —— 文字缩放会抖，这也是文档站顶栏的既有做法。
+      </li>
+      <li>
+        横向滚动容器里的焦点环保留，只是内缩 2px（否则外扩的环会被裁掉）—— 这是让它可见，不是抹掉它。
+      </li>
+      <li>
+        <code>prefers-reduced-motion: reduce</code> 下这一族的所有过渡关闭；导航本来就是瞬时改色，
+        关掉不影响任何信息的传达。
+      </li>
+    </ul>
+  </section>
+</Docs>

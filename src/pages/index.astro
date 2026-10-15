@@ -1,0 +1,146 @@
+---
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+
+const pillars = [
+  {
+    title: '全站直角',
+    body: '8 个圆角档位全部归零。没有一处 4px 的柔和过渡，边界永远是硬边。',
+    code: '--radius-*: 0px',
+  },
+  {
+    title: '正文即等宽',
+    body: '正文、按钮、导航、表单控件都走等宽字体；无衬线只留给标题、表头和统计数字。',
+    code: 'font-family: var(--font-mono)',
+  },
+  {
+    title: '描边代替投影',
+    body: '深色下"浮起"是零模糊的 1px 外描边，悬停只改描边透明度，所以不会跳动。',
+    code: 'box-shadow: var(--zz-elevation)',
+  },
+]
+
+const swatches = [
+  { token: 'bg-deep', note: '凹槽' },
+  { token: 'bg', note: '页面' },
+  { token: 'surface', note: '面板' },
+  { token: 'surface-2', note: '悬停面' },
+  { token: 'border-subtle', note: '发丝线' },
+  { token: 'border-strong', note: '控件描边' },
+  { token: 'text', note: '主文本' },
+  { token: 'text-muted', note: '弱文本' },
+  { token: 'brand', note: '强调' },
+  { token: 'danger', note: '危险' },
+  { token: 'warning', note: '警告' },
+  { token: 'success', note: '成功' },
+]
+
+const index = [
+  { href: '/foundations/color', label: '颜色', note: '12 个语义 token，两套主题的值逐条列清' },
+  { href: '/foundations/typography', label: '排版', note: '等宽与无衬线的分工，字号阶梯与角色配方' },
+  { href: '/foundations/space', label: '间距与层级', note: '间距刻度、容器宽度、边框与 z-index 规范' },
+  { href: '/foundations/motion', label: '动效与可访问性', note: '时长、按下反馈、主题擦除、reduced-motion' },
+  { href: '/components/button', label: '按钮', note: '6 变体 × 8 尺寸，交互反馈的唯一实现' },
+  { href: '/components/card', label: '卡片与展示', note: '卡片、徽章、头像、统计数字、代码块' },
+  { href: '/components/form', label: '表单', note: '输入、选择、勾选、开关与字段容器' },
+  { href: '/themes', label: '主题', note: '局部换主题与新增主题的完整步骤' },
+]
+---
+
+<Docs title="概览" description="zz design system：直角、等宽、1px 描边的界面语言。">
+  <span class="zz-doc__eyebrow">v0.1 · 终端美学</span>
+  <h1 class="zz-doc__title">为终端美学而生的界面语言</h1>
+  <p class="zz-doc__lede">
+    一套建立在 Tailwind v4 之上的 CSS 变量设计系统。12 个语义 token 决定所有颜色，两套主题（深色 / 亮色）挂在
+    <code>data-theme</code> 上，因此任何子树都能局部换主题。所有组件默认直角、等宽字体、1px 描边。
+  </p>
+
+  <div class="zz-row" style="margin-top:1.5rem">
+    <Button href="/foundations/color">从颜色开始</Button>
+    <Button variant="outline" href="/components/button">浏览组件</Button>
+    <Button variant="ghost" href="/themes">看主题切换</Button>
+  </div>
+
+  <section class="zz-doc__section">
+    <h2>三条主张</h2>
+    <p>整套系统只围绕三个决定展开，其余都是它们的推论。</p>
+    <div style="display:grid;gap:1rem;margin-top:1rem;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr))">
+      {
+        pillars.map((pillar) => (
+          <article
+            style="background:var(--zz-surface);box-shadow:var(--zz-elevation);padding:1.25rem"
+          >
+            <h3 style="font-size:1rem">{pillar.title}</h3>
+            <p style="margin-top:0.5rem;color:var(--zz-text-secondary);font-size:0.8125rem;line-height:1.65">
+              {pillar.body}
+            </p>
+            <code
+              style="display:block;margin-top:0.875rem;background:var(--zz-bg-deep);padding:0.375rem 0.5rem;color:var(--zz-text-muted);font-size:0.6875rem"
+            >
+              {pillar.code}
+            </code>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>快速开始</h2>
+    <p>样式入口是一个 CSS 文件，任何框架都能直接用；文档站本身是 Astro。</p>
+    <pre class="zz-doc__code"><code>{`# 1. 装依赖（字体与 Tailwind v4）
+pnpm add tailwindcss @tailwindcss/vite @fontsource-variable/geist @fontsource-variable/jetbrains-mono
+
+# 2. 在入口 CSS 里按顺序引入
+@import 'tailwindcss';
+@import './styles/fonts.css';    /* 自托管字体 */
+@import './styles/tokens.css';   /* 语义 token + 两套主题 */
+@import './styles/base.css';     /* 元素默认样式 */
+@import './styles/components/button.css';  /* 按需引入组件 */
+
+# 3. 在 vite 配置里挂上 Tailwind
+plugins: [tailwindcss()]`}</code></pre>
+    <p class="zz-doc__note">
+      组件的样式是原生 CSS，不经过构建也能用；只有文档站里的排版示例用了 Tailwind 工具类。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>token 速览</h2>
+    <p>下面每个色块都直接读取当前主题的变量，切换顶栏的开关即可看到两套值。</p>
+    <div
+      style="display:grid;gap:0.5rem;margin-top:1rem;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr))"
+    >
+      {
+        swatches.map((swatch) => (
+          <div style="border:1px solid var(--zz-border-subtle)">
+            <div style={`height:2.5rem;background:var(--zz-${swatch.token})`} />
+            <div style="padding:0.375rem 0.5rem;background:var(--zz-surface)">
+              <div style="font-size:0.6875rem;color:var(--zz-text)">{`--zz-${swatch.token}`}</div>
+              <div style="font-size:0.625rem;color:var(--zz-text-muted)">{swatch.note}</div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>目录</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>页面</th><th>内容</th></tr>
+      </thead>
+      <tbody>
+        {
+          index.map((item) => (
+            <tr>
+              <td><a href={item.href} style="text-decoration:underline;text-underline-offset:0.25em">{item.label}</a></td>
+              <td>{item.note}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </section>
+</Docs>
