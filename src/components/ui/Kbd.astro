@@ -1,0 +1,13 @@
+---
+/**
+ * Kbd —— 键帽。1px 控件级描边 + 底部加厚 1px 表示键帽，不用投影。
+ */
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+const classes = ['zz-kbd', className].filter(Boolean).join(' ')
+---
+
+<kbd class={classes}><slot /></kbd>

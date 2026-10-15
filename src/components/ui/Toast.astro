@@ -1,0 +1,28 @@
+---
+/**
+ * Toast —— 右下角堆叠通知里的一条。
+ *
+ * 多条时用 <div class="zz-toast-region"> 包住：它负责固定定位、z-index
+ * 与 0.5rem 的堆叠间距，卡片自身只负责外观与进入动画。
+ *
+ * variant: default | success | danger（后两者加 2px 状态色左线）
+ * role:    'status'（默认，礼貌播报）| 'alert'（失败类改立即播报）
+ */
+interface Props {
+  variant?: 'default' | 'success' | 'danger'
+  title?: string
+  role?: 'status' | 'alert'
+  class?: string
+}
+
+const { variant = 'default', title, role = 'status', class: className } = Astro.props
+
+const classes = ['zz-toast', variant !== 'default' && `zz-toast--${variant}`, className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<div class={classes} role={role}>
+  {title && <p class="zz-toast__title">{title}</p>}
+  <slot />
+</div>

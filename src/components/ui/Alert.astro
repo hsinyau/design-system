@@ -1,0 +1,25 @@
+---
+/**
+ * Alert —— 静态提示块：2px 状态色左线 + --zz-surface 底。
+ *
+ * variant: info（默认）| success | warning | danger
+ * role:    静态出现在页面里的提示**不要**传，传了会随页面加载播报一遍；
+ *          由 JS 动态插入的提示传 'alert'（danger / warning，立即播报）或
+ *          'status'（info / success，等当前朗读结束再播报）。
+ */
+interface Props {
+  variant?: 'info' | 'success' | 'warning' | 'danger'
+  title?: string
+  role?: 'alert' | 'status'
+  class?: string
+}
+
+const { variant = 'info', title, role, class: className } = Astro.props
+
+const classes = ['zz-alert', `zz-alert--${variant}`, className].filter(Boolean).join(' ')
+---
+
+<div class={classes} role={role}>
+  {title && <p class="zz-alert__title">{title}</p>}
+  <slot />
+</div>

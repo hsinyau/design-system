@@ -1,0 +1,61 @@
+---
+/**
+ * Card —— 展示容器：媒体井（16:9 凹槽 + 1px 内描边）+ 内容区（1rem / gap 0.375rem）。
+ *
+ * variant 可叠加：plain（无媒体）| tight（内距 0.75rem）| interactive（悬停换 elevation）| deep（凹槽底）
+ * 传 href 时整卡成为热区：标题里的链接用 absolute inset-0 的覆盖层铺满卡片，
+ * 焦点环改画在内缩的 .zz-card__ring 上（卡片自身 overflow: hidden，外扩的环会被裁掉）。
+ * 卡内的按钮/次级链接放进 slot="actions"（或 .zz-card__actions），它浮在热区之上。
+ */
+interface Props {
+  title?: string
+  description?: string
+  meta?: string
+  href?: string
+  variant?: 'plain' | 'tight' | 'interactive' | 'deep' | string | string[]
+  class?: string
+}
+
+const { title, description, meta, href, variant, class: className } = Astro.props
+
+const variants = (Array.isArray(variant) ? variant : [variant]).filter(Boolean) as string[]
+const classes = ['zz-card', ...variants.map((v) => `zz-card--${v}`), className]
+  .filter(Boolean)
+  .join(' ')
+
+const hasMedia = Astro.slots.has('media')
+const hasActions = Astro.slots.has('actions')
+---
+
+<article class={classes}>
+  {
+    hasMedia && (
+      <div class="zz-card__media">
+        <slot name="media" />
+      </div>
+    )
+  }
+
+  <div class="zz-card__body">
+    {
+      title && (
+        <h3 class="zz-card__title">
+          {href ? (
+            <a class="zz-card__link" href={href}>
+              <span class="zz-card__hotzone" aria-hidden="true" />
+              {title}
+            </a>
+          ) : (
+            title
+          )}
+        </h3>
+      )
+    }
+    {description && <p class="zz-card__desc">{description}</p>}
+    <slot />
+    {meta && <p class="zz-card__meta">{meta}</p>}
+    {hasActions && <div class="zz-card__actions"><slot name="actions" /></div>}
+  </div>
+
+  {href && <span class="zz-card__ring" aria-hidden="true" />}
+</article>

@@ -1,0 +1,48 @@
+---
+/**
+ * Field —— 把 label、控件、hint、错误文案串成一个纵向单元。
+ *
+ * for 对应控件的 id；hint / error 有 for 时才生成稳定 id
+ * （`<id>-hint` / `<id>-error`），调用方把这两个 id 挂到控件的
+ * aria-describedby 上即可。error 也可以改用 <slot name="error" /> 自定义。
+ * 出现 error 时整块自动带 .zz-field--invalid，内部控件转危险色描边。
+ */
+interface Props {
+  label: string
+  /** 控件 id，用于 label[for] 与 hint/error 的 id 推导 */
+  for?: string
+  hint?: string
+  error?: string
+  /** 只负责渲染星号；控件自身的 required 由调用方传 */
+  required?: boolean
+  invalid?: boolean
+  class?: string
+}
+
+const {
+  label,
+  for: htmlFor,
+  hint,
+  error,
+  required = false,
+  invalid = false,
+  class: className,
+} = Astro.props
+
+const isInvalid = invalid || Boolean(error)
+
+const classes = ['zz-field', isInvalid && 'zz-field--invalid', className].filter(Boolean).join(' ')
+
+const hintId = hint && htmlFor ? `${htmlFor}-hint` : undefined
+const errorId = error && htmlFor ? `${htmlFor}-error` : undefined
+---
+
+<div class={classes}>
+  <label class="zz-field__label" for={htmlFor}>
+    {label}
+    {required && <span class="zz-field__required" aria-hidden="true">*</span>}
+  </label>
+  <slot />
+  {hint && <p class="zz-field__hint" id={hintId}>{hint}</p>}
+  {error ? <p class="zz-field__error" id={errorId}>{error}</p> : <slot name="error" />}
+</div>

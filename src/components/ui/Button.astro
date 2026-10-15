@@ -1,0 +1,44 @@
+---
+/**
+ * Button —— 唯一负责交互反馈的基础控件。
+ *
+ * variant: default | outline | secondary | ghost | destructive | link
+ * size:    xs | sm | md | lg | icon-xs | icon-sm | icon | icon-lg
+ *
+ * 传 href 时渲染为 <a>（aria-disabled 代替 disabled）。
+ * 其余属性（aria-label、target、name…）原样透传到元素上。
+ */
+interface Props {
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'icon-xs' | 'icon-sm' | 'icon' | 'icon-lg'
+  href?: string
+  type?: 'button' | 'submit' | 'reset'
+  disabled?: boolean
+  class?: string
+  [key: string]: unknown
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  href,
+  type = 'button',
+  disabled = false,
+  class: className,
+  ...rest
+} = Astro.props
+
+const classes = ['zz-btn', `zz-btn--${variant}`, `zz-btn--${size}`, className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+{href ? (
+  <a class={classes} href={href} aria-disabled={disabled ? 'true' : undefined} {...rest}>
+    <slot />
+  </a>
+) : (
+  <button class={classes} type={type} disabled={disabled} {...rest}>
+    <slot />
+  </button>
+)}

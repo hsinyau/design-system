@@ -1,0 +1,26 @@
+---
+/**
+ * Radio —— 自绘圆形单选框，真实 <input type="radio"> 保留在 DOM 里。
+ *
+ * 同一组用相同 name；圆形是这套直角语言里唯一允许的圆角例外。
+ * 组语义请用 <fieldset> + <legend>（或 role="radiogroup" + aria-labelledby），
+ * 组内每一项单独用本组件。
+ */
+import type { HTMLAttributes } from 'astro/types'
+
+interface Props extends Omit<HTMLAttributes<'input'>, 'class' | 'type'> {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+
+const classes = ['zz-radio', rest.disabled && 'zz-radio--disabled', className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<label class={classes}>
+  <input {...rest} class="zz-radio__input" type="radio" />
+  <span class="zz-radio__box" aria-hidden="true"></span>
+  <span class="zz-radio__label"><slot /></span>
+</label>

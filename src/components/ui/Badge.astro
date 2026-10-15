@@ -1,0 +1,24 @@
+---
+/**
+ * Badge —— 状态与分类标签。1.25rem 高，0.75rem mono。
+ *
+ * variant: default（无底 + 发丝线描边）| brand | danger | warning | success | info | muted
+ * dot: 前置 0.375rem 状态点（继承当前文字色）
+ */
+interface Props {
+  variant?: 'default' | 'brand' | 'danger' | 'warning' | 'success' | 'info' | 'muted'
+  dot?: boolean
+  class?: string
+}
+
+const { variant = 'default', dot = false, class: className } = Astro.props
+
+const classes = ['zz-badge', variant !== 'default' && `zz-badge--${variant}`, className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<span class={classes}>
+  {dot && <span class="zz-badge__dot" aria-hidden="true" />}
+  <slot />
+</span>

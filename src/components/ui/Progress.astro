@@ -1,0 +1,39 @@
+---
+/**
+ * Progress —— 进度条：0.375rem 轨道 + 品牌色填充。
+ *
+ * 省略 value（或显式 indeterminate）即不确定态，填充条自己扫动；
+ * 有 value 时用内联宽度表达进度 —— 动态值是约定里唯一允许内联样式的地方。
+ */
+interface Props {
+  /** 当前进度，省略则是不确定态 */
+  value?: number
+  /** 进度上限，默认 100 */
+  max?: number
+  indeterminate?: boolean
+  /** 读屏用的名字，例如「上传进度」 */
+  label?: string
+  class?: string
+}
+
+const { value, max = 100, indeterminate, label = '进度', class: className } = Astro.props
+
+const isIndeterminate = indeterminate ?? value === undefined
+const safeMax = max > 0 ? max : 100
+const percent = value === undefined ? 0 : Math.min(100, Math.max(0, (value / safeMax) * 100))
+
+const classes = ['zz-progress', isIndeterminate && 'zz-progress--indeterminate', className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<div
+  class={classes}
+  role="progressbar"
+  aria-label={label}
+  aria-valuemin="0"
+  aria-valuemax={safeMax}
+  aria-valuenow={isIndeterminate ? undefined : value}
+>
+  <span class="zz-progress__bar" style={isIndeterminate ? undefined : `width: ${percent}%`}></span>
+</div>

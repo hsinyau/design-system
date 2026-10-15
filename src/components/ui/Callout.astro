@@ -1,0 +1,24 @@
+---
+/**
+ * Callout —— 长文里的提示块：2px 左线 + --zz-surface 底。
+ *
+ * variant: note（中性，控件级描边）| brand（默认）| info | warning | danger | success
+ * 语义上用 <aside>：它是正文的旁注，不是正文本身。
+ */
+interface Props {
+  variant?: 'brand' | 'note' | 'info' | 'warning' | 'danger' | 'success'
+  title?: string
+  class?: string
+}
+
+const { variant = 'brand', title, class: className } = Astro.props
+
+const classes = ['zz-prose__callout', `zz-prose__callout--${variant}`, className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<aside class={classes}>
+  {title && <p class="zz-prose__callout__title">{title}</p>}
+  <slot />
+</aside>

@@ -1,0 +1,25 @@
+---
+/**
+ * Stat —— 单个统计值：sans 大数字（tabular-nums）+ mono 单位与标签。
+ *
+ * size: md（1.75rem，默认）| lg（2.25rem）
+ */
+interface Props {
+  value: string | number
+  label?: string
+  unit?: string
+  size?: 'md' | 'lg'
+  class?: string
+}
+
+const { value, label, unit, size = 'md', class: className } = Astro.props
+
+const classes = ['zz-stat', size === 'lg' && 'zz-stat--lg', className].filter(Boolean).join(' ')
+---
+
+<div class={classes}>
+  <span class="zz-stat__value">
+    {value}{unit && <span class="zz-stat__unit">{unit}</span>}
+  </span>
+  {label && <span class="zz-stat__label">{label}</span>}
+</div>

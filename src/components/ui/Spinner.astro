@@ -1,0 +1,22 @@
+---
+/**
+ * Spinner —— 1.5px 圆环，弧顶为品牌色，0.75s 线性旋转。
+ *
+ * size: sm（0.875rem）| md（1.25rem，默认）| lg（1.75rem）
+ * role="status" + aria-label 让读屏在它出现时播报一次；标签描述的是
+ * 「正在做什么」，不是「转圈」。
+ */
+interface Props {
+  size?: 'sm' | 'md' | 'lg'
+  label?: string
+  class?: string
+}
+
+const { size = 'md', label = '加载中', class: className } = Astro.props
+
+const classes = ['zz-spinner', size !== 'md' && `zz-spinner--${size}`, className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<span class={classes} role="status" aria-label={label}></span>

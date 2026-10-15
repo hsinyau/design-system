@@ -1,0 +1,31 @@
+---
+/**
+ * Textarea —— 多行文本控件。
+ *
+ * size 只决定字号与最小高度（4 / 4.5 / 5.5 / 6.5rem），高度可纵向拉伸。
+ * invalid 渲染 aria-invalid='true'。
+ */
+import type { HTMLAttributes } from 'astro/types'
+
+type Size = 'xs' | 'sm' | 'md' | 'lg'
+
+interface Props extends Omit<HTMLAttributes<'textarea'>, 'class'> {
+  size?: Size
+  invalid?: boolean
+  class?: string
+}
+
+const { size = 'md', invalid = false, class: className, ...rest } = Astro.props
+
+const classes = [
+  'zz-input',
+  'zz-textarea',
+  `zz-input--${size}`,
+  invalid && 'zz-input--invalid',
+  className,
+]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<textarea {...rest} class={classes} aria-invalid={invalid ? 'true' : undefined}></textarea>

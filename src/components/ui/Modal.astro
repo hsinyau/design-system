@@ -1,0 +1,169 @@
+---
+/**
+ * Modal —— 居中对话框。
+ *
+ * 遮罩是 --zz-bg-deep 的 72% 混合，面板是 --zz-surface + --zz-elevation；
+ * 打开时焦点进面板，关闭后回到触发按钮，Esc / 点遮罩都能关。
+ *
+ * 触发方式二选一：
+ *   - 传 trigger，组件自己渲染一个 zz-btn 触发的按钮；
+ *   - 不传 trigger，外部元素加 data-zz-modal-open="<id>"。
+ * 面板内任何元素加 data-zz-modal-close 即可关闭；
+ * data-zz-modal-autofocus 指定打开后的初始焦点。
+ */
+interface Props {
+  /** 容器 id，与 data-zz-modal-open 对应 */
+  id: string
+  /** 对话框的无障碍名称，一般写可见标题的文字 */
+  label: string
+  /** 传了就在组件内渲染触发按钮 */
+  trigger?: string
+  triggerVariant?: 'default' | 'outline' | 'secondary' | 'ghost'
+  triggerSize?: 'sm' | 'md' | 'lg'
+  class?: string
+}
+
+const {
+  id,
+  label,
+  trigger,
+  triggerVariant = 'outline',
+  triggerSize = 'md',
+  class: className,
+} = Astro.props
+
+const classes = ['zz-modal', className].filter(Boolean).join(' ')
+
+// 没有 JS 时把面板摊平成普通区块，保证内容仍可读
+const noJs = `<style>#${id}{position:static;display:block;padding:0;background:none;animation:none}#${id} .zz-modal__panel{max-height:none;animation:none}</style>`
+---
+
+{trigger && (
+  <button
+    class={`zz-btn zz-btn--${triggerVariant} zz-btn--${triggerSize}`}
+    type="button"
+    data-zz-modal-open={id}
+    aria-haspopup="dialog"
+    aria-controls={id}
+  >
+    {trigger}
+  </button>
+)}
+
+<div class={classes} id={id} role="dialog" aria-modal="true" aria-label={label} hidden>
+  <div class="zz-modal__panel" tabindex="-1">
+    <slot />
+  </div>
+</div>
+
+<noscript set:html={noJs} />
+
+<script is:inline>
+  ;(() => {
+    if (window.__zzModalReady) return
+    window.__zzModalReady = true
+
+    const FOCUSABLE =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+    const panelOf = (dialog) => dialog.querySelector('.zz-modal__panel') || dialog
+
+    // 打开栈：Esc 与 Tab 陷阱都只作用于最后打开的那一层
+    const stack = []
+    const top = () => {
+      while (stack.length && stack[stack.length - 1].hidden) stack.pop()
+      return stack[stack.length - 1]
+    }
+
+    const focusablesIn = (panel) =>
+      Array.from(panel.querySelectorAll(FOCUSABLE)).filter(
+        (el) => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement,
+      )
+
+    const open = (dialog, trigger) => {
+      if (!dialog || !dialog.hidden) return
+      dialog.__zzTrigger = trigger || document.activeElement
+      dialog.hidden = false
+      stack.push(dialog)
+      const panel = panelOf(dialog)
+      const target = panel.querySelector('[data-zz-modal-autofocus]')
+      ;(target || focusablesIn(panel)[0] || panel).focus()
+    }
+
+    const close = (dialog) => {
+      if (!dialog || dialog.hidden) return
+      dialog.hidden = true
+      const at = stack.indexOf(dialog)
+      if (at > -1) stack.splice(at, 1)
+      const trigger = dialog.__zzTrigger
+      dialog.__zzTrigger = null
+      if (trigger && document.contains(trigger)) trigger.focus()
+    }
+
+    let veilPointerDown = null
+
+    document.addEventListener('pointerdown', (event) => {
+      veilPointerDown =
+        event.target instanceof Element && event.target.classList.contains('zz-modal')
+          ? event.target
+          : null
+    })
+
+    document.addEventListener('click', (event) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+
+      const opener = target.closest('[data-zz-modal-open]')
+      if (opener) {
+        event.preventDefault()
+        open(document.getElementById(opener.dataset.zzModalOpen), opener)
+        return
+      }
+
+      const closer = target.closest('[data-zz-modal-close]')
+      if (closer) {
+        event.preventDefault()
+        close(closer.closest('.zz-modal'))
+        return
+      }
+
+      // 点遮罩关闭：按下与抬起都落在遮罩本身，避免从面板里拖拽误关
+      const veil = target.closest('.zz-modal')
+      if (veil && target === veil && veilPointerDown === veil) close(veil)
+    })
+
+    document.addEventListener('keydown', (event) => {
+      const dialog = top()
+      if (!dialog) return
+
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        close(dialog)
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const panel = panelOf(dialog)
+      const items = focusablesIn(panel)
+      const active = document.activeElement
+
+      if (!items.length) {
+        event.preventDefault()
+        panel.focus()
+        return
+      }
+
+      const first = items[0]
+      const last = items[items.length - 1]
+
+      if (event.shiftKey && (active === first || active === panel)) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    })
+  })()
+</script>

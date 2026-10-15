@@ -1,0 +1,50 @@
+---
+/**
+ * CodeBlock —— 代码展示：头栏 + 代码区，可选行号。
+ *
+ * 内容两种给法：
+ *   1. code="…"        纯文本，自动按行铺开（行号用 CSS 计数器生成）；
+ *   2. 默认 slot       已着色的 HTML（优先级更高）。
+ * 着色只用 .zz-tok-key（青）/ .zz-tok-num（橙）/ .zz-tok-muted（注释），
+ * 不引第三方高亮库。
+ */
+interface Props {
+  /** 头栏左侧标签（语言名、文件名） */
+  title?: string
+  /** 头栏左侧标签的替代写法，语义同 title */
+  lang?: string
+  /** 纯文本源码 */
+  code?: string
+  /** 显示行号 */
+  lineNumbers?: boolean
+  class?: string
+}
+
+const { title, lang, code = '', lineNumbers = false, class: className } = Astro.props
+
+const classes = ['zz-code', lineNumbers && 'zz-code--numbered', className]
+  .filter(Boolean)
+  .join(' ')
+
+const hasSlot = Astro.slots.has('default')
+const hasActions = Astro.slots.has('actions')
+const label = lang ?? title
+const hasHead = Boolean(label || hasActions)
+const lines = code.replace(/\n+$/, '').split('\n')
+---
+
+<div class={classes}>
+  {
+    hasHead && (
+      <div class="zz-code__head">
+        {label && <span class="zz-code__lang">{label}</span>}
+        {hasActions && (
+          <div class="zz-code__actions">
+            <slot name="actions" />
+          </div>
+        )}
+      </div>
+    )
+  }
+  <pre class="zz-code__pre zz-scroll"><code class="zz-code__code">{hasSlot ? <slot /> : <span class="zz-code__lines">{lines.map((line) => <span class="zz-code__line">{line === '' ? ' ' : line}</span>)}</span>}</code></pre>
+</div>

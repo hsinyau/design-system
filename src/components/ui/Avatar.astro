@@ -1,0 +1,35 @@
+---
+/**
+ * Avatar —— 1.5 / 2 / 2.5 / 3rem 的圆形头像。
+ *
+ * 有 src 时渲染 <img>（alt 直接透传）；否则显示首字母，
+ * 此时整个圆圈是 role="img" + aria-label，首字母本身对读屏隐藏。
+ */
+interface Props {
+  src?: string
+  alt?: string
+  initials?: string
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  class?: string
+}
+
+const { src, alt, initials, size = 'md', class: className } = Astro.props
+
+const classes = ['zz-avatar', size !== 'md' && `zz-avatar--${size}`, className]
+  .filter(Boolean)
+  .join(' ')
+
+const label = alt ?? initials ?? ''
+---
+
+{
+  src ? (
+    <span class={classes}>
+      <img src={src} alt={alt ?? ''} loading="lazy" decoding="async" />
+    </span>
+  ) : (
+    <span class={classes} role="img" aria-label={label}>
+      <span aria-hidden="true">{initials ?? ''}</span>
+    </span>
+  )
+}

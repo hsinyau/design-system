@@ -1,0 +1,26 @@
+---
+/**
+ * Input —— 单行文本控件。
+ *
+ * size: xs | sm | md | lg，高度与按钮同一阶梯（2 / 2.25 / 2.5 / 2.75rem）。
+ * invalid 渲染 aria-invalid='true'（描边转危险色），并附加 .zz-input--invalid。
+ * 其余原生属性（type / name / id / placeholder / required / value …）原样透传。
+ */
+import type { HTMLAttributes } from 'astro/types'
+
+type Size = 'xs' | 'sm' | 'md' | 'lg'
+
+interface Props extends Omit<HTMLAttributes<'input'>, 'class' | 'size'> {
+  size?: Size
+  invalid?: boolean
+  class?: string
+}
+
+const { size = 'md', invalid = false, class: className, ...rest } = Astro.props
+
+const classes = ['zz-input', `zz-input--${size}`, invalid && 'zz-input--invalid', className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<input {...rest} class={classes} aria-invalid={invalid ? 'true' : undefined} />

@@ -1,0 +1,56 @@
+---
+/**
+ * Sidenav —— 竖排侧栏导航。
+ *
+ * 层级只靠一条导轨表达：每个链接自己带 1px border-inline-start
+ * （--zz-border-subtle），首尾相接成一条连续竖线；
+ * 当前项把导轨和文字一起换成品牌色，不加底、不加粗。
+ *
+ * 分组标题是 0.625rem 的大写 eyebrow，不参与导轨。
+ */
+interface SidenavItem {
+  href: string
+  label: string
+  /** 当前页：渲染 aria-current="page" */
+  current?: boolean
+}
+
+interface SidenavGroup {
+  /** 分组标题，省略则只渲染列表 */
+  title?: string
+  items: SidenavItem[]
+}
+
+interface Props {
+  groups: SidenavGroup[]
+  label?: string
+  class?: string
+}
+
+const { groups, label = '侧栏导航', class: className } = Astro.props
+
+const classes = ['zz-sidenav', className].filter(Boolean).join(' ')
+---
+
+<nav class={classes} aria-label={label}>
+  {
+    groups.map((group) => (
+      <div class="zz-sidenav__group">
+        {group.title && <p class="zz-sidenav__title">{group.title}</p>}
+        <ul class="zz-sidenav__list">
+          {group.items.map((item) => (
+            <li>
+              <a
+                class="zz-sidenav__link"
+                href={item.href}
+                aria-current={item.current ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>

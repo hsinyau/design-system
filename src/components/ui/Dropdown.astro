@@ -1,0 +1,77 @@
+---
+/**
+ * Dropdown —— 原生 <details>/<summary>，无 JS 也能开合。
+ *
+ * 内容交给 slot：菜单项用 .zz-dropdown__item（<a> 或 <button> 都行），
+ * 危险项加 .zz-dropdown__item--danger。脚本只补两件事：
+ * 点击外部关闭、Esc 关闭并把焦点还给 summary。
+ */
+interface Props {
+  label: string
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost'
+  size?: 'sm' | 'md' | 'lg'
+  /** 默认菜单贴左；end 贴右 */
+  align?: 'start' | 'end'
+  class?: string
+}
+
+const { label, variant = 'outline', size = 'md', align = 'start', class: className } = Astro.props
+
+const classes = ['zz-dropdown', align === 'end' && 'zz-dropdown--end', className]
+  .filter(Boolean)
+  .join(' ')
+---
+
+<details class={classes}>
+  <summary class={`zz-btn zz-btn--${variant} zz-btn--${size}`}>
+    {label}
+    <svg
+      class="zz-dropdown__chev"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6"></path>
+    </svg>
+  </summary>
+  <div class="zz-dropdown__menu">
+    <slot />
+  </div>
+</details>
+
+<script is:inline>
+  ;(() => {
+    if (window.__zzDropdownReady) return
+    window.__zzDropdownReady = true
+
+    const opened = () => Array.from(document.querySelectorAll('details.zz-dropdown[open]'))
+
+    const close = (details, restoreFocus) => {
+      if (!details) return
+      details.open = false
+      if (restoreFocus) details.querySelector('summary')?.focus()
+    }
+
+    document.addEventListener('click', (event) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+
+      const owner = target.closest('details.zz-dropdown')
+      opened().forEach((details) => {
+        if (details !== owner) close(details, false)
+      })
+
+      if (target.closest('[data-zz-dropdown-close]')) close(owner, false)
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return
+      const menus = opened()
+      if (!menus.length) return
+      event.preventDefault()
+      close(menus[menus.length - 1], true)
+    })
+  })()
+</script>

@@ -1,0 +1,20 @@
+---
+/**
+ * Tooltip —— 纯 CSS 提示，零 JS。
+ *
+ * 宿主元素带 data-tooltip，气泡由 ::after + content: attr(data-tooltip) 渲染；
+ * 悬停或焦点进入 150ms 后出现，离开立即收起。
+ * 因为 ::after 的文字不保证被读屏播报，关键信息仍要写在可见文案或 aria-label 里。
+ */
+interface Props {
+  /** 气泡文字 */
+  label: string
+  class?: string
+}
+
+const { label, class: className } = Astro.props
+
+const classes = ['zz-tooltip', className].filter(Boolean).join(' ')
+---
+
+<span class={classes} data-tooltip={label}><slot /></span>

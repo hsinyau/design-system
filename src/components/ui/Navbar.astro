@@ -1,0 +1,36 @@
+---
+/**
+ * Navbar —— 吸顶导航栏。
+ *
+ * 栏体 sticky + 90% 地面色 + 12px 模糊：滚过的内容透出来但读不清，
+ * 下边线是 1px --zz-border-subtle，所以不依赖阴影也分得开层。
+ * 高 var(--zz-nav-h)（含刘海安全区），内层最大宽 72rem、横向内距 1rem
+ * （40rem 起 1.5rem）。
+ *
+ * 插槽：
+ *   brand   —— 左端字标，用 .zz-navbar__brand（可配 .zz-navbar__mark）
+ *   默认     —— 链接，自己写 <a class="zz-navbar__link">，当前页挂 aria-current="page"
+ *   actions —— 右端操作，自动靠右
+ */
+interface Props {
+  /** nav 的无障碍名称 */
+  label?: string
+  class?: string
+}
+
+const { label = '主导航', class: className } = Astro.props
+
+const classes = ['zz-navbar', className].filter(Boolean).join(' ')
+const hasBrand = Astro.slots.has('brand')
+const hasActions = Astro.slots.has('actions')
+---
+
+<header class={classes}>
+  <div class="zz-navbar__bar">
+    {hasBrand && <slot name="brand" />}
+    <nav class="zz-navbar__nav" aria-label={label}>
+      <slot />
+    </nav>
+    {hasActions && <div class="zz-navbar__actions"><slot name="actions" /></div>}
+  </div>
+</header>

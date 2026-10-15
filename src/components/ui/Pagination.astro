@@ -1,0 +1,93 @@
+---
+/**
+ * Pagination —— 分页器。
+ *
+ * 页码是 2.25rem 的正方形（与 .zz-btn--icon-sm 同尺寸，观感沿用
+ * 描边 + surface 底），当前页填 --zz-brand / --zz-brand-ink，两端是
+ * 上一页 / 下一页。
+ *
+ * 页码超过 7 页时折叠成「1 … 4 5 6 … 12」，省略号占位与页码同宽，
+ * 因此数字列始终对齐。
+ *
+ * 边界处渲染成不可聚焦的 <span aria-disabled="true">，而不是指向自己的死链。
+ */
+interface Props {
+  /** 当前页，1 起 */
+  page: number
+  /** 总页数；小于 2 时整个组件不渲染 */
+  total: number
+  /** 生成第 n 页的链接，默认 ?page=n */
+  hrefFor?: (page: number) => string
+  label?: string
+  class?: string
+}
+
+const {
+  page,
+  total,
+  hrefFor = (n: number) => `?page=${n}`,
+  label = '分页',
+  class: className,
+} = Astro.props
+
+const classes = ['zz-pagination', className].filter(Boolean).join(' ')
+
+const count = Math.max(0, Math.floor(total))
+const current = Math.min(Math.max(1, Math.floor(page)), count)
+
+const slots: (number | 'gap')[] = []
+if (count > 1 && count <= 7) {
+  for (let n = 1; n <= count; n += 1) slots.push(n)
+} else if (count > 7) {
+  const wanted = [1, count, current - 1, current, current + 1]
+  const numbers = [...new Set(wanted)].filter((n) => n >= 1 && n <= count).sort((a, b) => a - b)
+  let previous = 0
+  for (const n of numbers) {
+    if (previous && n - previous > 1) slots.push('gap')
+    slots.push(n)
+    previous = n
+  }
+}
+---
+
+{
+  count > 1 && (
+    <nav class={classes} aria-label={label}>
+      {current > 1 ? (
+        <a class="zz-pagination__item zz-pagination__prev" href={hrefFor(current - 1)} rel="prev">
+          ← 上一页
+        </a>
+      ) : (
+        <span class="zz-pagination__item zz-pagination__prev" aria-disabled="true">
+          ← 上一页
+        </span>
+      )}
+
+      {slots.map((slot) =>
+        slot === 'gap' ? (
+          <span class="zz-pagination__gap" aria-hidden="true">
+            …
+          </span>
+        ) : slot === current ? (
+          <span class="zz-pagination__item" aria-current="page">
+            {slot}
+          </span>
+        ) : (
+          <a class="zz-pagination__item" href={hrefFor(slot)} aria-label={`第 ${slot} 页`}>
+            {slot}
+          </a>
+        ),
+      )}
+
+      {current < count ? (
+        <a class="zz-pagination__item zz-pagination__next" href={hrefFor(current + 1)} rel="next">
+          下一页 →
+        </a>
+      ) : (
+        <span class="zz-pagination__item zz-pagination__next" aria-disabled="true">
+          下一页 →
+        </span>
+      )}
+    </nav>
+  )
+}

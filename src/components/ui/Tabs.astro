@@ -1,0 +1,107 @@
+---
+/**
+ * Tabs —— 横向标签条。
+ *
+ * 组件本身只输出 role="tablist" 的容器；标签与面板由使用方写：
+ *
+ *   <Tabs label="示例">
+ *     <button class="zz-tabs__tab" type="button" role="tab"
+ *             id="tab-a" aria-controls="panel-a" aria-selected="true">甲</button>
+ *     <button class="zz-tabs__tab" type="button" role="tab"
+ *             id="tab-b" aria-controls="panel-b" aria-selected="false" tabindex="-1">乙</button>
+ *   </Tabs>
+ *   <div class="zz-tabs__panel" role="tabpanel" id="panel-a" aria-labelledby="tab-a" tabindex="0">…</div>
+ *   <div class="zz-tabs__panel" role="tabpanel" id="panel-b" aria-labelledby="tab-b" tabindex="0">…</div>
+ *
+ * 页面底部那段 is:inline 脚本做三件事，都是渐进增强：
+ *   1. 按 aria-controls 给未选中的面板补 hidden（所以无 JS 时所有面板
+ *      都留在 DOM 里、内容照样可读，只是不能切换）；
+ *   2. 点标签即切换（aria-selected + roving tabindex + 面板显隐）；
+ *   3. 左/右箭头在标签间移动焦点，Home / End 跳到首尾。
+ * 监听用事件委托挂在 document 上，并用 dataset 标记保证只绑一次 ——
+ * 一页里可以有任意多个 Tabs。
+ */
+interface Props {
+  /** tablist 的无障碍名称 */
+  label?: string
+  class?: string
+}
+
+const { label = '标签页', class: className } = Astro.props
+
+const classes = ['zz-tabs', className].filter(Boolean).join(' ')
+---
+
+<div class={classes} role="tablist" aria-label={label}>
+  <slot />
+</div>
+
+<script is:inline>
+  ;(() => {
+    const root = document.documentElement
+    if (root.dataset.zzTabs === 'on') return
+    root.dataset.zzTabs = 'on'
+
+    const tabsIn = (list) => Array.from(list.querySelectorAll('[role="tab"]'))
+    const panelOf = (tab) => {
+      const id = tab.getAttribute('aria-controls')
+      return id ? document.getElementById(id) : null
+    }
+
+    const select = (tab, focus) => {
+      const list = tab.closest('.zz-tabs[role="tablist"]')
+      if (!list) return
+      for (const item of tabsIn(list)) {
+        const on = item === tab
+        item.setAttribute('aria-selected', on ? 'true' : 'false')
+        item.tabIndex = on ? 0 : -1
+        const panel = panelOf(item)
+        if (panel) panel.hidden = !on
+      }
+      if (focus) tab.focus()
+    }
+
+    // 初始同步：每张标签条只保留一个选中项，其余面板收起来
+    const sync = () => {
+      for (const list of document.querySelectorAll('.zz-tabs[role="tablist"]')) {
+        const tabs = tabsIn(list)
+        if (!tabs.length) continue
+        select(tabs.find((tab) => tab.getAttribute('aria-selected') === 'true') || tabs[0], false)
+      }
+    }
+
+    const target = (event) => (event.target instanceof Element ? event.target : null)
+
+    document.addEventListener('click', (event) => {
+      const el = target(event)
+      const tab = el && el.closest('[role="tab"]')
+      if (!tab || !tab.closest('.zz-tabs[role="tablist"]') || tab.disabled) return
+      select(tab, false)
+    })
+
+    document.addEventListener('keydown', (event) => {
+      const el = target(event)
+      const tab = el && el.closest('[role="tab"]')
+      if (!tab) return
+      const list = tab.closest('.zz-tabs[role="tablist"]')
+      if (!list) return
+
+      const tabs = tabsIn(list)
+      const index = tabs.indexOf(tab)
+      const last = tabs.length - 1
+      let next = null
+
+      if (event.key === 'ArrowRight') next = tabs[index === last ? 0 : index + 1]
+      else if (event.key === 'ArrowLeft') next = tabs[index === 0 ? last : index - 1]
+      else if (event.key === 'Home') next = tabs[0]
+      else if (event.key === 'End') next = tabs[last]
+
+      if (!next) return
+      event.preventDefault()
+      select(next, true)
+    })
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync)
+    else sync()
+  })()
+</script>

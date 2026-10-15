@@ -1,0 +1,58 @@
+---
+/**
+ * Select —— 原生 <select> 包装。
+ *
+ * 外观：appearance: none 之后由 .zz-select::after 自绘 1px 箭头，
+ * 所以外层包一个 .zz-select 用于定位箭头，class 也落在这个外层上。
+ * 尺寸、描边、禁用与无效态沿用 .zz-input（与 Input 共用底座）。
+ *
+ * 只支持单选：多选是列表箱形态，箭头语义不成立。
+ */
+import type { HTMLAttributes } from 'astro/types'
+
+type Size = 'xs' | 'sm' | 'md' | 'lg'
+
+interface Props extends Omit<HTMLAttributes<'select'>, 'class' | 'size' | 'multiple'> {
+  size?: Size
+  /** 首项占位：值为空且 disabled，没有 value 时默认选中 */
+  placeholder?: string
+  invalid?: boolean
+  class?: string
+}
+
+const { size = 'md', placeholder, invalid = false, disabled = false, class: className, ...rest } =
+  Astro.props
+
+const classes = [
+  'zz-select',
+  `zz-select--${size}`,
+  invalid && 'zz-select--invalid',
+  disabled && 'zz-select--disabled',
+  className,
+]
+  .filter(Boolean)
+  .join(' ')
+
+const controlClasses = [
+  'zz-input',
+  'zz-select__control',
+  `zz-input--${size}`,
+  invalid && 'zz-input--invalid',
+]
+  .filter(Boolean)
+  .join(' ')
+
+const hasValue = rest.value !== undefined && rest.value !== ''
+---
+
+<div class={classes}>
+  <select
+    {...rest}
+    class={controlClasses}
+    disabled={disabled}
+    aria-invalid={invalid ? 'true' : undefined}
+  >
+    {placeholder && <option value="" disabled selected={!hasValue}>{placeholder}</option>}
+    <slot />
+  </select>
+</div>

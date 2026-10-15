@@ -1,0 +1,51 @@
+---
+/**
+ * Breadcrumb —— 层级路径。
+ *
+ * 0.75rem 的等宽行；分隔符是 --zz-text-muted，末项（当前页）是 --zz-text
+ * 并带 aria-current="page"，因此"我在哪"不只靠颜色表达。
+ * 末项永远渲染成不可点击的 <span>，中间项没给 href 时也是纯文本。
+ */
+interface BreadcrumbItem {
+  href?: string
+  label: string
+}
+
+interface Props {
+  items: BreadcrumbItem[]
+  label?: string
+  class?: string
+}
+
+const { items, label = '面包屑', class: className } = Astro.props
+
+const classes = ['zz-breadcrumb', className].filter(Boolean).join(' ')
+---
+
+<nav class={classes} aria-label={label}>
+  <ol class="zz-breadcrumb__list">
+    {
+      items.map((item, index) => {
+        const last = index === items.length - 1
+        return (
+          <li class="zz-breadcrumb__item">
+            {item.href && !last ? (
+              <a class="zz-breadcrumb__link" href={item.href}>
+                {item.label}
+              </a>
+            ) : (
+              <span class="zz-breadcrumb__link" aria-current={last ? 'page' : undefined}>
+                {item.label}
+              </span>
+            )}
+            {!last && (
+              <span class="zz-breadcrumb__sep" aria-hidden="true">
+                /
+              </span>
+            )}
+          </li>
+        )
+      })
+    }
+  </ol>
+</nav>

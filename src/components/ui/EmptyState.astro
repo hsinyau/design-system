@@ -1,0 +1,28 @@
+---
+/**
+ * EmptyState —— 空状态：2rem 图标 + 标题 + 说明 + 一个可选操作位。
+ *
+ * 图标放 slot="icon"（只放 svg，装饰性，自动 aria-hidden）；
+ * 操作放 slot="actions"（放一个主操作即可，多于一个就不是空状态了）。
+ * 直接写进卡片或面板里都成立：组件自身只给内距与居中，不画底与描边。
+ */
+interface Props {
+  title?: string
+  description?: string
+  class?: string
+}
+
+const { title, description, class: className } = Astro.props
+
+const classes = ['zz-empty', className].filter(Boolean).join(' ')
+const hasIcon = Astro.slots.has('icon')
+const hasActions = Astro.slots.has('actions')
+---
+
+<div class={classes}>
+  {hasIcon && <div class="zz-empty__icon" aria-hidden="true"><slot name="icon" /></div>}
+  {title && <p class="zz-empty__title">{title}</p>}
+  {description && <p class="zz-empty__desc">{description}</p>}
+  <slot />
+  {hasActions && <div class="zz-empty__actions"><slot name="actions" /></div>}
+</div>
