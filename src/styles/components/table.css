@@ -1,0 +1,98 @@
+/* =============================================================
+   zz design system · table
+   -------------------------------------------------------------
+   数据表格。全部靠 1px 描边与底色分层，不用阴影、不用圆角：
+   表头是 --zz-surface（面板层）、下边框是 --zz-border-strong（控件级），
+   行分隔退回 --zz-border-subtle（发丝线）。
+
+   横向溢出时把 .zz-table 包在 <div class="zz-scroll zz-table-wrap"> 里。
+   ============================================================= */
+
+@layer components {
+  /* 横向溢出容器：细滚动条由 .zz-scroll（base.css）提供 */
+  .zz-table-wrap {
+    overflow-x: auto;
+  }
+
+  .zz-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--zz-text-secondary);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zz-table caption {
+    padding-bottom: 0.5rem;
+    color: var(--zz-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-align: start;
+  }
+
+  .zz-table th,
+  .zz-table td {
+    padding: 0.5rem 0.75rem;
+    text-align: start;
+    vertical-align: top;
+  }
+
+  /* 表头：sans 600 + 面板底 + 控件级下描边 */
+  .zz-table thead th {
+    border-bottom: 1px solid var(--zz-border-strong);
+    background: var(--zz-surface);
+    color: var(--zz-text);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* 行分隔：发丝线 */
+  .zz-table tbody th,
+  .zz-table tbody td {
+    border-bottom: 1px solid var(--zz-border-subtle);
+  }
+
+  /* 行头（scope="row"）：比单元格更亮、不加粗，避免和表头抢注意力 */
+  .zz-table tbody th {
+    color: var(--zz-text);
+    font-weight: 500;
+  }
+
+  .zz-table tbody tr:last-child th,
+  .zz-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  /* 数字列：右对齐 + 等宽数字，位数才能对齐。
+     选择器要带上 .zz-table，否则会被 `.zz-table th | td { text-align: start }` 压回去。 */
+  .zz-table .zz-table__num {
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+
+  /* ---------------------------------------------------------- 变体 */
+
+  .zz-table--tight th,
+  .zz-table--tight td {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .zz-table--striped tbody tr:nth-child(even) > * {
+    background: var(--zz-surface-2);
+  }
+
+  /* 全网格线：密集对照表用，行分隔随之交给单元格自身 */
+  .zz-table--bordered {
+    border: 1px solid var(--zz-border-strong);
+  }
+
+  .zz-table--bordered th,
+  .zz-table--bordered td {
+    border: 1px solid var(--zz-border-subtle);
+  }
+
+  .zz-table--bordered thead th {
+    border-color: var(--zz-border-strong);
+  }
+}

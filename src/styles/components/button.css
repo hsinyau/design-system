@@ -1,0 +1,204 @@
+/* =============================================================
+   zz design system · button
+   -------------------------------------------------------------
+   尺寸阶梯：32 / 36 / 40 / 44px（xs / sm / md / lg），内距 10 / 12 / 16 / 20px。
+   按下反馈用 scale(0.96) 而不是位移；过渡只覆盖 4 个属性。
+   ============================================================= */
+
+@layer components {
+  .zz-btn {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 0;
+    background-clip: padding-box;
+    color: var(--zz-text);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition-property: background-color, border-color, color, transform;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  .zz-btn:active {
+    transform: scale(0.96);
+  }
+
+  .zz-btn:disabled,
+  .zz-btn[aria-disabled='true'] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .zz-btn svg {
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
+  /* ---------------------------------------------------------- 变体 */
+
+  .zz-btn--default {
+    background: var(--zz-brand);
+    color: var(--zz-brand-ink);
+  }
+
+  .zz-btn--default:hover {
+    background: color-mix(in oklch, var(--zz-brand), white 14%);
+  }
+
+  .zz-btn--outline {
+    border-color: var(--zz-border-strong);
+    background: var(--zz-surface);
+  }
+
+  .zz-btn--outline:hover,
+  .zz-btn--outline[aria-expanded='true'] {
+    background: var(--zz-surface-2);
+  }
+
+  .zz-btn--secondary {
+    background: var(--zz-surface-2);
+  }
+
+  .zz-btn--secondary:hover {
+    background: color-mix(in oklch, var(--zz-surface-2), var(--zz-text) 8%);
+  }
+
+  .zz-btn--ghost {
+    background: transparent;
+  }
+
+  .zz-btn--ghost:hover,
+  .zz-btn--ghost[aria-expanded='true'] {
+    background: var(--zz-surface-2);
+  }
+
+  .zz-btn--destructive {
+    background: color-mix(in oklch, var(--zz-danger) 12%, transparent);
+    color: var(--zz-danger);
+  }
+
+  .zz-btn--destructive:hover {
+    background: color-mix(in oklch, var(--zz-danger) 22%, transparent);
+  }
+
+  .zz-btn--link {
+    padding-inline: 0;
+    color: var(--zz-brand);
+    text-underline-offset: 0.25em;
+  }
+
+  .zz-btn--link:hover {
+    text-decoration: underline;
+  }
+
+  /* ---------------------------------------------------------- 尺寸 */
+
+  .zz-btn--xs {
+    height: 2rem;
+    gap: 0.375rem;
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .zz-btn--sm {
+    height: 2.25rem;
+    gap: 0.375rem;
+    padding-inline: 0.75rem;
+  }
+
+  .zz-btn--md {
+    height: 2.5rem;
+    padding-inline: 1rem;
+  }
+
+  .zz-btn--lg {
+    height: 2.75rem;
+    padding-inline: 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .zz-btn--icon-xs {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+  }
+
+  .zz-btn--icon-sm {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+  }
+
+  .zz-btn--icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+  }
+
+  .zz-btn--icon-lg {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+  }
+
+  .zz-btn--xs svg,
+  .zz-btn--icon-xs svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .zz-btn--sm svg,
+  .zz-btn--icon-sm svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .zz-btn--md svg,
+  .zz-btn--lg svg,
+  .zz-btn--icon svg,
+  .zz-btn--icon-lg svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* 命中区扩张：视觉尺寸不变，触屏更好点 */
+  .zz-btn--hit::before {
+    position: absolute;
+    inset: -0.25rem;
+    content: '';
+  }
+
+  .zz-btn--hit {
+    position: relative;
+  }
+
+  /* ---------------------------------------------------------- 按钮组 */
+
+  .zz-btn-group {
+    display: inline-flex;
+  }
+
+  .zz-btn-group > .zz-btn {
+    border-radius: 0;
+  }
+
+  .zz-btn-group > .zz-btn + .zz-btn {
+    margin-inline-start: -1px;
+  }
+
+  .zz-btn-group > .zz-btn:hover,
+  .zz-btn-group > .zz-btn:focus-visible {
+    position: relative;
+    z-index: 1;
+  }
+}

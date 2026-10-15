@@ -1,0 +1,496 @@
+/* =============================================================
+   zz design system · form
+   -------------------------------------------------------------
+   控件阶梯与按钮严格对齐：32 / 36 / 40 / 44px（xs / sm / md / lg）。
+   控件是「凹槽」：底用 --zz-bg-deep（比页面 --zz-bg 更深），
+   1px --zz-border-strong 描边 —— 与按钮的 --zz-surface「面」区分开。
+   唯一圆角例外是 radio 的圆点/圆环。
+
+   固定高度的控件不写 padding-block：行盒由 height 决定并垂直居中，
+   写死纵向内距会在 xs 档（2rem 高）裁字；横向内距 0.625rem / 0.75rem。
+   ============================================================= */
+
+@layer components {
+  /* ---------------------------------------------------------- 文本类控件底座
+     input / textarea / select 共用。 */
+
+  .zz-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--zz-border-strong);
+    border-radius: 0;
+    background: var(--zz-bg-deep);
+    padding-block: 0;
+    padding-inline: 0.75rem;
+    color: var(--zz-text);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1;
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  .zz-input::placeholder {
+    color: var(--zz-text-muted);
+    opacity: 1;
+  }
+
+  .zz-input:hover:not(:disabled):not([aria-disabled='true']) {
+    border-color: color-mix(in srgb, var(--zz-border-strong), var(--zz-text) 30%);
+  }
+
+  /* 焦点：只把描边换成品牌色，外描边交给全局 :focus-visible，不要覆盖 */
+  .zz-input:focus-visible {
+    border-color: var(--zz-brand);
+  }
+
+  /* 无效态。刻意排在焦点之后：无效 + 聚焦时仍能看到危险色描边。 */
+  .zz-input[aria-invalid='true'],
+  .zz-input--invalid,
+  .zz-field--invalid .zz-input {
+    border-color: var(--zz-danger);
+  }
+
+  /* 禁用态：半透明 + 移除指针事件 */
+  .zz-input:disabled,
+  .zz-input[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* 文本输入类不位移：按下反馈是聚焦与描边，不是 scale —— 输入框缩放会让文字抖动。 */
+
+  /* ---------------------------------------------------------- 尺寸 */
+
+  .zz-input--xs {
+    height: 2rem;
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .zz-input--sm {
+    height: 2.25rem;
+  }
+
+  .zz-input--md {
+    height: 2.5rem;
+  }
+
+  .zz-input--lg {
+    height: 2.75rem;
+    font-size: 0.9375rem;
+  }
+
+  /* ---------------------------------------------------------- 文本域
+     多行才需要纵向内距；高度改由 min-height 表达，允许用户纵向拉伸。 */
+
+  .zz-textarea {
+    padding-block: 0.625rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .zz-textarea.zz-input--xs {
+    height: auto;
+    min-height: 4rem;
+  }
+
+  .zz-textarea.zz-input--sm {
+    height: auto;
+    min-height: 4.5rem;
+  }
+
+  .zz-textarea.zz-input--md {
+    height: auto;
+    min-height: 5.5rem;
+  }
+
+  .zz-textarea.zz-input--lg {
+    height: auto;
+    min-height: 6.5rem;
+  }
+
+  /* ---------------------------------------------------------- 选择器
+     原生 <select> + 自绘 1px 箭头。箭头是旋转 45° 的 1px 直角边，
+     不依赖背景图，也就不需要写死色值。 */
+
+  .zz-select {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .zz-select__control {
+    padding-inline-end: 2rem;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .zz-select::after {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 0.75rem;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-inline-end: 1px solid var(--zz-text-muted);
+    border-block-end: 1px solid var(--zz-text-muted);
+    content: '';
+    pointer-events: none;
+    /* 旋转 45° 后 V 形整体落在方盒的下半部（盒中心到 V 形中线约 2px），
+       -50% 之后再上移 2px 才是光学居中，和原生箭头的位置一致 */
+    transform: translateY(calc(-50% - 2px)) rotate(45deg);
+  }
+
+  /* 其余尺寸共用默认内距，只有 xs 需要收窄 */
+  .zz-select--xs .zz-select__control {
+    padding-inline-end: 1.5rem;
+  }
+
+  .zz-select--xs::after {
+    inset-inline-end: 0.625rem;
+  }
+
+  .zz-select--invalid::after {
+    border-color: var(--zz-danger);
+  }
+
+  /* 单独一条规则：调用方直接透传 aria-invalid 而没走 invalid prop 时，箭头也跟着变 */
+  .zz-select:has(.zz-select__control[aria-invalid='true'])::after {
+    border-color: var(--zz-danger);
+  }
+
+  /* 变暗由内部 .zz-input:disabled 负责，这里不叠 opacity（否则会变成 25%） */
+  .zz-select--disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .zz-select--disabled::after {
+    opacity: 0.5;
+  }
+
+  /* 原生下拉面板：只用 token，跟随主题 */
+  .zz-select__control option {
+    background: var(--zz-surface);
+    color: var(--zz-text);
+  }
+
+  /* ---------------------------------------------------------- Field
+     label + 控件 + hint + 错误文案。label 用 for 指向控件 id，
+     hint / error 由调用方通过 aria-describedby 挂到控件上。 */
+
+  .zz-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+  }
+
+  /* 单选组常用 <fieldset class="zz-field"> + <legend class="zz-field__label">。
+     legend 不参与 fieldset 的 flex 布局（浏览器按特殊规则把它摆在内容之上），
+     gap 对它无效，下间距必须单独补。 */
+  .zz-field > legend {
+    margin-block-end: 0.375rem;
+  }
+
+  .zz-field__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--zz-text-secondary);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .zz-field__required {
+    color: var(--zz-danger);
+  }
+
+  .zz-field__hint {
+    color: var(--zz-text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .zz-field__error {
+    color: var(--zz-danger);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .zz-field__hint:empty,
+  .zz-field__error:empty {
+    display: none;
+  }
+
+  /* ---------------------------------------------------------- 复选 / 单选
+     真实 input 留在 DOM 里（键盘、表单提交、屏幕阅读器都依赖它），
+     只把不透明度压到 0；视觉层是紧随其后的 span，用相邻选择器驱动。
+     焦点环从不可见的 input 转发到视觉层 —— 是让它可见，不是抹掉。
+
+     行宽贴合内容（width: fit-content）：落在纵向 flex 容器里时不会被 stretch
+     撑满整行，否则行尾的空白也会变成点击区。 */
+
+  .zz-check,
+  .zz-radio {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    min-height: 1.5rem;
+    color: var(--zz-text);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .zz-check__input,
+  .zz-radio__input {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    opacity: 0;
+  }
+
+  .zz-check__box,
+  .zz-radio__box {
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--zz-border-strong);
+    border-radius: 0;
+    background: var(--zz-bg-deep);
+    transition-property: background-color, border-color, transform;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  .zz-check__label,
+  .zz-radio__label {
+    min-width: 0;
+  }
+
+  .zz-check:hover .zz-check__box,
+  .zz-radio:hover .zz-radio__box {
+    border-color: color-mix(in srgb, var(--zz-border-strong), var(--zz-text) 30%);
+  }
+
+  /* 按下反馈：只缩放视觉层，不动布局 */
+  .zz-check:active .zz-check__box,
+  .zz-radio:active .zz-radio__box {
+    transform: scale(0.96);
+  }
+
+  /* 勾：两条 2px 直角边旋转 -45°，不引入图标依赖 */
+  .zz-check__box::after {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    width: 0.4375rem;
+    height: 0.1875rem;
+    border-inline-start: 0.125rem solid var(--zz-brand-ink);
+    border-block-end: 0.125rem solid var(--zz-brand-ink);
+    content: '';
+    opacity: 0;
+    transform: translate(-50%, -65%) rotate(-45deg);
+    transition-property: opacity;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  /* 不确定态：一条横杠 */
+  .zz-check__box::before {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    width: 0.4375rem;
+    height: 0.125rem;
+    background: var(--zz-brand-ink);
+    content: '';
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition-property: opacity;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  /* 选中态：品牌填充 + 品牌反色勾/点 */
+  .zz-check__input:checked + .zz-check__box,
+  .zz-check__input:indeterminate + .zz-check__box,
+  .zz-check__input[data-indeterminate='true'] + .zz-check__box,
+  .zz-radio__input:checked + .zz-radio__box {
+    border-color: var(--zz-brand);
+    background: var(--zz-brand);
+  }
+
+  .zz-check__input:checked + .zz-check__box::after {
+    opacity: 1;
+  }
+
+  .zz-check__input:indeterminate + .zz-check__box::before,
+  .zz-check__input[data-indeterminate='true'] + .zz-check__box::before {
+    opacity: 1;
+  }
+
+  .zz-check__input:indeterminate + .zz-check__box::after,
+  .zz-check__input[data-indeterminate='true'] + .zz-check__box::after {
+    opacity: 0;
+  }
+
+  /* ---------------------------------------------------------- 单选专属
+     圆形是这套语言里唯一允许的圆角例外。 */
+
+  .zz-radio__box {
+    border-radius: 50%;
+  }
+
+  .zz-radio__box::after {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: var(--zz-brand-ink);
+    content: '';
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+    transition-property: opacity, transform;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  .zz-radio__input:checked + .zz-radio__box::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* 无效态：勾选框与单选框同样可以表达错误（如「必须同意条款」） */
+  .zz-check__input[aria-invalid='true'] + .zz-check__box,
+  .zz-radio__input[aria-invalid='true'] + .zz-radio__box,
+  .zz-field--invalid .zz-check__box,
+  .zz-field--invalid .zz-radio__box {
+    border-color: var(--zz-danger);
+  }
+
+  /* 焦点环转发到视觉层 */
+  .zz-check__input:focus-visible + .zz-check__box,
+  .zz-radio__input:focus-visible + .zz-radio__box,
+  .zz-switch__input:focus-visible + .zz-switch__track {
+    outline: 2px solid var(--zz-brand);
+    outline-offset: 2px;
+  }
+
+  /* ---------------------------------------------------------- 开关
+     矩形直角轨道 + 纯色滑块。 */
+
+  .zz-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    min-height: 1.5rem;
+    color: var(--zz-text);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .zz-switch__input {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 2.25rem;
+    height: 1.25rem;
+    margin: 0;
+    opacity: 0;
+  }
+
+  .zz-switch__track {
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 1.25rem;
+    border: 1px solid var(--zz-border-strong);
+    border-radius: 0;
+    background: var(--zz-bg-deep);
+    transition-property: background-color, border-color, transform;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  .zz-switch__thumb {
+    position: absolute;
+    inset-block-start: 0.125rem;
+    inset-inline-start: 0.125rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    background: var(--zz-text-muted);
+    transition-property: background-color, transform;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  .zz-switch__label {
+    min-width: 0;
+  }
+
+  .zz-switch:hover .zz-switch__track {
+    border-color: color-mix(in srgb, var(--zz-border-strong), var(--zz-text) 30%);
+  }
+
+  .zz-switch:active .zz-switch__track {
+    transform: scale(0.96);
+  }
+
+  .zz-switch__input:checked + .zz-switch__track {
+    border-color: var(--zz-brand);
+    background: var(--zz-brand);
+  }
+
+  /* 轨道内宽 34px − 两侧留白 2px − 滑块 14px = 16px 行程 */
+  .zz-switch__input:checked + .zz-switch__track .zz-switch__thumb {
+    background: var(--zz-brand-ink);
+    transform: translateX(1rem);
+  }
+
+  /* ---------------------------------------------------------- 禁用态 */
+
+  .zz-check--disabled,
+  .zz-radio--disabled,
+  .zz-switch--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* ---------------------------------------------------------- 减弱动效 */
+
+  @media (prefers-reduced-motion: reduce) {
+    .zz-input,
+    .zz-textarea,
+    .zz-check__box,
+    .zz-check__box::before,
+    .zz-check__box::after,
+    .zz-radio__box,
+    .zz-radio__box::after,
+    .zz-switch__track,
+    .zz-switch__thumb {
+      transition: none;
+    }
+  }
+}

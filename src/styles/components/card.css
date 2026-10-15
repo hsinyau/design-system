@@ -1,0 +1,341 @@
+/* =============================================================
+   zz design system · card & display bits
+   -------------------------------------------------------------
+   只展示、不承载行为的一族：卡片、徽章、键帽、头像、统计值。
+
+   浮起一律用 --zz-elevation（1px 零模糊描边），悬停换
+   --zz-elevation-hover —— 同一几何、只改 alpha，所以不会跳动，
+   也永远不要自造投影。
+
+   分层提醒：base.css 里的 `h1–h6` / `p` / `code,kbd,pre` 默认值
+   是**未分层**的，而未分层声明的优先级高于任何 @layer，所以凡是
+   和这些元素默认值抢属性的规则（卡片标题、键帽字号）必须写在
+   @layer 之外 —— 层内写会被静默吃掉。
+   ============================================================= */
+
+@layer components {
+  /* ---------------------------------------------------------- 卡片骨架 */
+
+  .zz-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--zz-surface);
+    box-shadow: var(--zz-elevation);
+    transition-property: box-shadow, background-color, transform;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  /* 媒体井：16:9 凹槽 + 1px 内描边（凹槽比页面更深一层） */
+  .zz-card__media {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: var(--zz-bg-deep);
+    outline: 1px solid var(--zz-img-outline);
+    outline-offset: -1px;
+  }
+
+  .zz-card__media > img,
+  .zz-card__media > svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .zz-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 1rem;
+  }
+
+  .zz-card__desc {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--zz-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .zz-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--zz-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 卡内操作：和整卡热区同处一个层叠上下文，靠 DOM 顺序（更靠后）压住热区。
+     不用 z-index —— 层级阶梯只给导航/浮层用。 */
+  .zz-card__actions {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
+
+  /* ---------------------------------------------------------- 整卡热区 */
+
+  .zz-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .zz-card__link:focus-visible {
+    /* 焦点环改画在 .zz-card__ring 上（内缩，见下） */
+    outline: none;
+  }
+
+  .zz-card__hotzone {
+    position: absolute;
+    inset: 0;
+  }
+
+  .zz-card__ring {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* 焦点环内缩 2px：卡片自己 overflow: hidden，外扩的环会被裁掉 */
+  .zz-card:has(.zz-card__link:focus-visible) .zz-card__ring {
+    outline: 2px solid var(--zz-brand);
+    outline-offset: -2px;
+  }
+
+  @supports not selector(:has(*)) {
+    .zz-card:focus-within .zz-card__ring {
+      outline: 2px solid var(--zz-brand);
+      outline-offset: -2px;
+    }
+  }
+
+  /* ---------------------------------------------------------- 卡片变体 */
+
+  .zz-card--interactive:hover {
+    box-shadow: var(--zz-elevation-hover);
+  }
+
+  /* 大面积卡片只做极轻收缩，避免整块跳动 */
+  .zz-card--interactive:active {
+    transform: scale(0.995);
+  }
+
+  .zz-card--tight .zz-card__body {
+    gap: 0.25rem;
+    padding: 0.75rem;
+  }
+
+  .zz-card--deep {
+    background: var(--zz-bg-deep);
+  }
+
+  /* 无媒体形态：不必改标记，直接关掉媒体井 */
+  .zz-card--plain .zz-card__media {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .zz-card--interactive:active {
+      transform: none;
+    }
+  }
+
+  /* ---------------------------------------------------------- 徽章 */
+
+  .zz-badge {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.375rem;
+    height: 1.25rem;
+    border: 1px solid var(--zz-border-subtle);
+    padding-inline: 0.375rem;
+    color: var(--zz-text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* 状态点：0.375rem 的圆点（圆形除头像外的第二处例外，方点表达不了状态） */
+  .zz-badge__dot {
+    flex-shrink: 0;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .zz-badge--brand {
+    border-color: transparent;
+    background: var(--zz-brand-soft);
+    color: var(--zz-brand);
+  }
+
+  .zz-badge--danger {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--zz-danger) 12%, transparent);
+    color: var(--zz-danger);
+  }
+
+  .zz-badge--warning {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--zz-warning) 12%, transparent);
+    color: var(--zz-warning);
+  }
+
+  .zz-badge--success {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--zz-success) 12%, transparent);
+    color: var(--zz-success);
+  }
+
+  .zz-badge--info {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--zz-info) 12%, transparent);
+    color: var(--zz-info);
+  }
+
+  .zz-badge--muted {
+    border-color: transparent;
+    background: var(--zz-surface-2);
+    color: var(--zz-text-muted);
+  }
+
+  /* ---------------------------------------------------------- 头像 */
+
+  .zz-avatar {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    width: 2rem;
+    height: 2rem;
+    /* 圆形：圆角规则的明确例外 */
+    border-radius: 50%;
+    border: 1px solid var(--zz-border-subtle);
+    background: var(--zz-surface-2);
+    color: var(--zz-text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .zz-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .zz-avatar--sm {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.625rem;
+  }
+
+  .zz-avatar--md {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .zz-avatar--lg {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .zz-avatar--xl {
+    width: 3rem;
+    height: 3rem;
+    font-size: 0.875rem;
+  }
+
+  /* ---------------------------------------------------------- 统计值 */
+
+  .zz-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .zz-stat__value {
+    color: var(--zz-text);
+    font-family: var(--font-sans);
+    font-size: 1.75rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .zz-stat--lg .zz-stat__value {
+    font-size: 2.25rem;
+  }
+
+  .zz-stat__unit {
+    margin-left: 0.25rem;
+    color: var(--zz-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .zz-stat__label {
+    color: var(--zz-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ---------------------------------------------------------------
+   层外：与 base.css 未分层元素默认值直接竞争的部分
+   （`h1–h6 { font-size / margin / … }`、`code,kbd,pre { font-size }`）
+   --------------------------------------------------------------- */
+
+.zz-card__title {
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  color: var(--zz-text);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zz-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--zz-border-strong);
+  /* 底部加厚 1px 表示键帽，不用投影 */
+  border-bottom-width: 2px;
+  background: var(--zz-surface-2);
+  padding: 0.125rem 0.375rem;
+  color: var(--zz-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+}

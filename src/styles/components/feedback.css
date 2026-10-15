@@ -1,0 +1,280 @@
+/* =============================================================
+   zz design system · feedback
+   -------------------------------------------------------------
+   状态反馈族：Alert（静态提示块）、Progress、Spinner、
+   Toast（右下角堆叠通知）、EmptyState（空状态）。
+
+   分工：状态色只出现在「线、弧、填充」这类一像素级的元素上，
+   承载它们的面（背景、描边、文字）一律回到主题 token —— 因此
+   状态色跨主题恒定，而反馈本身在深色与亮色两套主题下都成立。
+
+   动效：Progress 的位移动画、Spinner 的旋转、Toast 的进入动画
+   都在文件末尾统一给了 prefers-reduced-motion 降级。
+   ============================================================= */
+
+@layer components {
+  /* ---------------------------------------------------------- Alert */
+
+  .zz-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    /* 2px 状态色左线：提示块与正文之间唯一的强调 */
+    border: 1px solid var(--zz-border-subtle);
+    border-left: 2px solid var(--zz-info);
+    background: var(--zz-surface);
+    padding: 0.75rem 1rem 0.75rem 0.875rem;
+    color: var(--zz-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .zz-alert__title {
+    color: var(--zz-info);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+
+  .zz-alert--info {
+    border-left-color: var(--zz-info);
+  }
+
+  .zz-alert--info .zz-alert__title {
+    color: var(--zz-info);
+  }
+
+  .zz-alert--success {
+    border-left-color: var(--zz-success);
+  }
+
+  .zz-alert--success .zz-alert__title {
+    color: var(--zz-success);
+  }
+
+  .zz-alert--warning {
+    border-left-color: var(--zz-warning);
+  }
+
+  .zz-alert--warning .zz-alert__title {
+    color: var(--zz-warning);
+  }
+
+  .zz-alert--danger {
+    border-left-color: var(--zz-danger);
+  }
+
+  .zz-alert--danger .zz-alert__title {
+    color: var(--zz-danger);
+  }
+
+  .zz-alert code {
+    color: var(--zz-text);
+  }
+
+  /* ---------------------------------------------------------- Progress */
+
+  .zz-progress {
+    overflow: hidden;
+    width: 100%;
+    height: 0.375rem;
+    /* 轨道是凹槽：比页面浅一档的 --zz-surface-2 */
+    background: var(--zz-surface-2);
+  }
+
+  .zz-progress__bar {
+    display: block;
+    height: 100%;
+    background: var(--zz-brand);
+    transition-property: width;
+    transition-duration: var(--zz-dur);
+    transition-timing-function: var(--zz-ease);
+  }
+
+  /* 不确定态：固定 35% 宽的一条，来回扫过轨道 */
+  .zz-progress--indeterminate .zz-progress__bar {
+    width: 35%;
+    animation: zz-progress-sweep 1.1s var(--zz-ease) infinite;
+  }
+
+  @keyframes zz-progress-sweep {
+    from {
+      transform: translateX(-105%);
+    }
+
+    to {
+      transform: translateX(300%);
+    }
+  }
+
+  /* ---------------------------------------------------------- Spinner */
+
+  .zz-spinner {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    /* 圆形是圆环的必要几何：与头像、状态点同属直角规则的明确例外 */
+    border: 1.5px solid var(--zz-border-strong);
+    border-top-color: var(--zz-brand);
+    border-radius: 50%;
+    animation: zz-spin 0.75s linear infinite;
+  }
+
+  .zz-spinner--sm {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .zz-spinner--lg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  @keyframes zz-spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  /* ---------------------------------------------------------- Toast */
+
+  /* 堆叠容器：固定右下角，自身不吃指针事件，只有卡片吃 */
+  .zz-toast-region {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: var(--zz-z-dropdown);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    max-width: calc(100vw - 2rem);
+    pointer-events: none;
+  }
+
+  .zz-toast {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 16rem;
+    /* 透明左线占位：变体换成状态色时几何不跳 */
+    border: 1px solid var(--zz-border-subtle);
+    border-left: 2px solid transparent;
+    background: var(--zz-surface);
+    box-shadow: var(--zz-elevation);
+    padding: 0.75rem 1rem;
+    color: var(--zz-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    pointer-events: auto;
+    animation: zz-toast-in 200ms var(--zz-ease) both;
+  }
+
+  .zz-toast__title {
+    color: var(--zz-text);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+
+  .zz-toast--success {
+    border-left-color: var(--zz-success);
+  }
+
+  .zz-toast--danger {
+    border-left-color: var(--zz-danger);
+  }
+
+  @keyframes zz-toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---------------------------------------------------------- EmptyState */
+
+  .zz-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+  }
+
+  .zz-empty__icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--zz-text-muted);
+  }
+
+  .zz-empty__icon svg {
+    width: 2rem;
+    height: 2rem;
+    stroke-width: 1.25;
+  }
+
+  .zz-empty__title {
+    color: var(--zz-text);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+
+  .zz-empty__desc {
+    max-width: 26rem;
+    color: var(--zz-text-muted);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .zz-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  /* ---------------------------------------------------------- 动效降级 */
+
+  @media (prefers-reduced-motion: reduce) {
+    .zz-progress__bar {
+      transition: none;
+    }
+
+    /* 不确定态退化成一条静止的满轨道 */
+    .zz-progress--indeterminate .zz-progress__bar {
+      width: 100%;
+      transform: none;
+      animation: none;
+      opacity: 0.6;
+    }
+
+    /* 旋转停下，弧顶仍指向同一处，读屏文案照旧播报 */
+    .zz-spinner {
+      animation: none;
+    }
+
+    .zz-toast {
+      transform: none;
+      animation: none;
+    }
+  }
+}
