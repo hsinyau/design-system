@@ -1,0 +1,16 @@
+---
+import Docs from '@/layouts/Docs.astro'
+import Button from '@/components/ui/Button.astro'
+---
+
+<Docs title="404" description="页面不存在。">
+  <span class="zz-doc__eyebrow">404</span>
+  <h1 class="zz-doc__title">这里没有页面</h1>
+  <p class="zz-doc__lede">
+    地址可能拼错了，或者这个页面还没写。文档站的完整目录在左侧栏，也可以从下面两个入口重新开始。
+  </p>
+  <div class="zz-row" style="margin-top:1.5rem">
+    <Button href="/">回到概览</Button>
+    <Button variant="outline" href="/foundations/color">看基础规范</Button>
+  </div>
+</Docs>

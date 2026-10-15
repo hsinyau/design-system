@@ -1,3 +1,5 @@
-packages: []
+# pnpm 12 把"依赖的构建脚本被忽略"视为安装失败（ERR_PNPM_IGNORED_BUILDS，退出码 1），
+# 而 esbuild 需要跑安装脚本。allowBuilds 只能在 pnpm-workspace.yaml 里配置
+# （package.json 的 pnpm.onlyBuiltDependencies 在 pnpm 12 已不生效）。
 allowBuilds:
   esbuild: true
