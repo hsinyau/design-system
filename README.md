@@ -66,6 +66,7 @@ apps/docs/
 └── src/styles/docs-shell.css 文档站外壳（不参与组件体系）
 
 wrangler.jsonc               Cloudflare 部署配置（assets 指向 apps/docs/dist）
+.github/workflows/publish.yml 打 tag 发布 npm 包
 scripts/check-tokens.mjs     一致性检查
 scripts/check-classes.mjs    类名交叉审计
 docs/CONVENTIONS.md          实现约定（新增组件前必读）
@@ -99,14 +100,32 @@ pnpm build                        # 文档站静态构建
 
 ## 发布库
 
+推荐走 GitHub Action（[`.github/workflows/publish.yml`](.github/workflows/publish.yml)）：**打 tag 即发布**，
+tag 去掉 `v` 前缀后必须等于包版本。
+
+```bash
+# 1. 改 packages/design-system/package.json 的 version 并提交
+# 2. 打 tag 推上去，剩下的交给 CI
+git tag v0.1.1 && git push origin v0.1.1
+```
+
+CI 会先跑 `check:tokens`、`check:classes` 与文档站构建，核对 tag 与包版本一致后执行
+`pnpm --filter @hsinyau/design-system publish`（`prepublishOnly` 负责重建 `dist/`）。也可以在
+Actions 页面手动触发。
+
+需要先在仓库 Secrets 里配置 `NPM_TOKEN`：npm 网站 → Access Tokens → Granular Access Token，
+权限至少 `Package: Read and write`，并允许 `@hsinyau` scope 与 publish。想改用 npm 的
+Trusted Publishing（不存长期 token）时，按 workflow 顶部注释删掉 `NODE_AUTH_TOKEN` 一行即可。
+
+本地手动发布：
+
 ```bash
 pnpm build:lib                                          # 先生成 dist/
 npm pack --dry-run --workspace packages/design-system    # 检查包内文件
 pnpm --filter @hsinyau/design-system publish            # 需要先 npm login
 ```
 
-`prepublishOnly` 会自动重新生成 `dist/`；包内只包含 `src/styles`（含字体与许可证）、
-`dist/`、`README.md`，文档站不会被发布。
+包内只包含 `src/styles`（含字体与许可证）、`dist/`、`README.md`、`LICENSE`，文档站不会被发布。
 
 ## 部署文档站
 

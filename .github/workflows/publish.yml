@@ -1,0 +1,76 @@
+name: publish
+
+# 打 tag 即发布：tag 名去掉 v 前缀必须等于 packages/design-system/package.json 的 version。
+#   git tag v0.1.1 && git push origin v0.1.1
+# 也可以在 Actions 页面手动触发（用 package.json 当前版本；该版本已存在时 npm 会拒绝）。
+#
+# 认证：需要在仓库 Secrets 里配置 NPM_TOKEN —— npm 网站 → Access Tokens →
+# Generate New Token → Granular Access Token，权限至少 Package: Read and write，
+# 并允许 @hsinyau scope 与 publish。
+#
+# 若改用 npm 的 Trusted Publishing（不需要长期 token）：在 npm 包设置里把发布者绑定到
+# 本仓库的这个 workflow 文件，然后删掉下面「发布到 npm」步骤里的 NODE_AUTH_TOKEN 一行，
+# 保留顶部的 id-token: write 权限即可；再把 `--provenance` 追加到发布命令后面可同时生成
+# 构建溯源。
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # provenance / Trusted Publishing 需要
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出
+        uses: actions/checkout@v4
+
+      # 与 Cloudflare 构建镜像用同一个 pnpm 版本，避免两边行为差异
+      - name: 准备 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.1
+
+      - name: 准备 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 自检
+        run: |
+          pnpm check:tokens
+          pnpm check:classes
+          pnpm build
+
+      - name: 校验 tag 与包版本一致
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version=$(node -p "require('./packages/design-system/package.json').version")
+          tag=${GITHUB_REF_NAME#v}
+          echo "package.json: $version / tag: $tag"
+          if [ "$version" != "$tag" ]; then
+            echo "::error::tag $GITHUB_REF_NAME 与包版本 $version 不一致：先改 packages/design-system/package.json 再重新打 tag"
+            exit 1
+          fi
+
+      # prepublishOnly 会自动重建 dist/（独立产物 + 字体），再交由 npm 打包发布
+      - name: 发布到 npm
+        run: pnpm --filter @hsinyau/design-system publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 确认 registry 上的版本
+        run: npm view @hsinyau/design-system version
