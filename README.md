@@ -65,6 +65,7 @@ apps/docs/
 ├── src/lib/routes.ts         文档导航结构
 └── src/styles/docs-shell.css 文档站外壳（不参与组件体系）
 
+wrangler.jsonc               Cloudflare 部署配置（assets 指向 apps/docs/dist）
 scripts/check-tokens.mjs     一致性检查
 scripts/check-classes.mjs    类名交叉审计
 docs/CONVENTIONS.md          实现约定（新增组件前必读）
@@ -109,10 +110,20 @@ pnpm --filter @hsinyau/design-system publish            # 需要先 npm login
 
 ## 部署文档站
 
-`apps/docs` 是纯静态产物（`apps/docs/dist/`），可直接部署到任意静态托管。用 Cloudflare
-Workers 静态资源时，把构建的 root directory 指向 `apps/docs`：构建命令
-`pnpm install && pnpm build`，静态资源目录 `apps/docs/dist`（`apps/docs/wrangler.jsonc`
-里已配好相对路径 `./dist`）。
+`apps/docs` 是纯静态产物（`apps/docs/dist/`），可直接部署到任意静态托管。
+
+用 Cloudflare Workers 静态资源时，**保持工作目录为仓库根即可**（就是现在的配置）：
+
+| 项 | 值 |
+| --- | --- |
+| 构建命令 | `pnpm install && pnpm build` |
+| 部署命令 | `npx wrangler deploy` |
+| 静态资源目录 | 根目录 `wrangler.jsonc` 的 `assets.directory` = `./apps/docs/dist` |
+
+根目录这份 `wrangler.jsonc` 是必需的：wrangler 4 在 workspace 根拒绝自动探测应用，
+没有显式配置就会报 "application detection logic has been run in the root of a workspace"。
+wrangler 的配置按调用目录解析，所以若你把 root directory 改成 `apps/docs`，
+就要在那个目录放一份 `wrangler.jsonc` 并把 `directory` 改成 `./dist`。
 
 ## token 一览
 

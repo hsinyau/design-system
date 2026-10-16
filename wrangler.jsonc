@@ -1,0 +1,17 @@
+// Cloudflare Workers 静态资源部署配置（在 workspace 根执行 wrangler 时使用）。
+//
+// 本站是纯静态产物（apps/docs/astro.config.mjs 里 output: 'static'），
+// 因此不需要 @astrojs/cloudflare 适配器，也不需要 Worker 脚本：
+// apps/docs/dist 直接作为静态资源托管。
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "design-system",
+  "compatibility_date": "2026-10-16",
+  "assets": {
+    "directory": "./apps/docs/dist",
+    // 目录形式的路由：/components/button/ 与 /components/button 都能命中
+    "html_handling": "auto-trailing-slash",
+    // apps/docs/dist/404.html 由 src/pages/404.astro 生成
+    "not_found_handling": "404-page"
+  }
+}
