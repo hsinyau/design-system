@@ -1,88 +1,173 @@
-name: publish
+name: Release
 
-# 打 tag 即发布：tag 名去掉 v 前缀必须等于 packages/design-system/package.json 的 version。
-#   git tag v0.1.1 && git push origin v0.1.1
-# 也可以在 Actions 页面手动触发（用 package.json 当前版本；该版本已存在时 npm 会拒绝）。
+# 发布由 changesets 托管，不再手动改版本、也不用手动打 tag：
 #
-# 认证走 npm 的 Trusted Publishing（OIDC）：仓库里不保存任何 npm token，
-# 凭据由 GitHub Actions 的 id-token 现场换取，只对本仓库的这个 workflow 文件有效。
+#   push main
+#     ├─ 有未发布的 changeset → 自动开 / 更新 "Version Packages" PR
+#     │    （该 PR 里写好了新版本号与 CHANGELOG）
+#     └─ 该 PR 被合并 → 这次 push 直接把包发到 npm，并打 tag、建 GitHub Release
 #
-# 一次性配置（在 npm 网站上做）：
-#   @hsinyau/design-system → Settings → Trusted Publisher → GitHub Actions
-#     Organization or user: hsinyau
-#     Repository:           design-system
-#     Workflow filename:    publish.yml     （只填文件名，不要带 .github/workflows/ 路径）
-#     Environment name:     留空            （本 workflow 不使用 GitHub environment）
-#     Allowed actions:      勾上 npm publish（默认只允许 npm stage publish，不勾会发布失败）
+# 「有改动的 PR」要跑一次 `pnpm changeset` 写变更说明，决定下次是 patch / minor / major；
+# 纯文档或工具链改动用 `pnpm changeset --empty` 记一个不发布版本的 changeset。
 #
-# 两个硬性要求（都在下面处理了）：
-#   - npm CLI ≥ 11.5.1：Node 22 自带的 npm 版本不够，所以显式升级；
-#   - 不要给 setup-node 传 registry-url：它会写入 //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}，
-#     与环境里不存在的 token 变量组合容易干扰 OIDC 认证；registry 由包内 publishConfig.registry 指定。
+# 认证走 npm 的 Trusted Publishing（OIDC）：仓库里不保存任何 npm token，凭据由
+# GitHub Actions 现场换取。因此按官方建议拆成 select-mode / version / pack / publish
+# 四个 job，把 id-token: write 只留给真正执行发布的那个 job。
+#
+# 一次性配置：
+#   1. npm：@hsinyau/design-system → Settings → Trusted Publisher → GitHub Actions
+#        Organization or user: hsinyau
+#        Repository:           design-system
+#        Workflow filename:    publish.yml   （只填文件名，不带路径）
+#        Environment name:     留空
+#        Allowed actions:      勾上 npm publish（默认只允许 npm stage publish）
+#   2. GitHub：仓库 Settings → Actions → General 里允许
+#      "Allow GitHub Actions to create and approve pull requests"，否则 version job 开不出 PR。
 on:
   push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+    branches:
+      - main
 
-permissions:
-  contents: read
-  id-token: write # OIDC 换取 npm 短期凭据，必须
+# 官方建议：先重置权限，再按 job 单独声明
+permissions: {}
 
+# 同一分支上的发布串行执行，避免两个 Version PR / 两次发布撞车
 concurrency:
-  group: publish-npm
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  NODE_VERSION: 24
+  # 与 Cloudflare 构建镜像保持一致，避免两边 pnpm 行为差异
+  PNPM_VERSION: 10.11.1
 
 jobs:
-  publish:
+  # 只读：跑自检，并判断这次该「升版本」还是「发布」
+  select-mode:
+    name: 判定 version / publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.select-mode.outputs.mode }}
+      publish-plan-artifact-id: ${{ steps.select-mode.outputs.publish-plan-artifact-id }}
     steps:
       - name: 检出
-        uses: actions/checkout@v4
-
-      # 与 Cloudflare 构建镜像用同一个 pnpm 版本，避免两边行为差异
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: 准备 pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.11.1
-
+          version: ${{ env.PNPM_VERSION }}
       - name: 准备 Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
-          cache: pnpm
-
-      - name: 升级 npm（Trusted Publishing 需要 npm >= 11.5.1）
-        run: |
-          npm install -g npm@^11.5.1
-          npm --version
-
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
-
       - name: 自检
         run: |
           pnpm check:tokens
           pnpm check:classes
           pnpm build
+      - name: 选择模式
+        id: select-mode
+        uses: changesets/action/select-mode@v2
 
-      - name: 校验 tag 与包版本一致
-        if: startsWith(github.ref, 'refs/tags/')
+  # 写权限：把 changeset 变成版本号与 CHANGELOG，并开 / 更新 Version Packages PR
+  version:
+    name: 开 / 更新 Version Packages PR
+    needs: select-mode
+    if: needs.select-mode.outputs.mode == 'version'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 提交版本改动与 CHANGELOG
+      pull-requests: write # 创建 / 更新 PR
+    steps:
+      - name: 检出
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: 准备 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: 准备 Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+      - name: 升版本
+        uses: changesets/action/version@v2
+
+  # 只读：构建并把待发布的包打成 tarball，产物通过 artifact 传给 publish
+  pack:
+    name: 打包
+    needs: select-mode
+    if: needs.select-mode.outputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      pack-dir-artifact-id: ${{ steps.pack.outputs.pack-dir-artifact-id }}
+    steps:
+      - name: 检出
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: 准备 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: 准备 Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+      - name: 构建库产物
+        run: pnpm build:lib
+      - name: 打包
+        id: pack
+        uses: changesets/action/pack@v2
+        with:
+          publish-plan-artifact-id: ${{ needs.select-mode.outputs.publish-plan-artifact-id }}
+
+  # 唯一带 id-token 的 job：用 OIDC 发布，再打 tag、建 Release
+  publish:
+    name: 发布到 npm（OIDC）
+    needs: pack
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 打 tag、创建 GitHub Release
+      id-token: write # Trusted Publishing
+    steps:
+      - name: 检出
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: 准备 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: 准备 Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      # Trusted Publishing 需要 npm CLI >= 11.5.1
+      - name: 升级 npm
         run: |
-          version=$(node -p "require('./packages/design-system/package.json').version")
-          tag=${GITHUB_REF_NAME#v}
-          echo "package.json: $version / tag: $tag"
-          if [ "$version" != "$tag" ]; then
-            echo "::error::tag $GITHUB_REF_NAME 与包版本 $version 不一致：先改 packages/design-system/package.json 再重新打 tag"
-            exit 1
-          fi
-
-      # 在包目录里发布：prepublishOnly 会自动重建 dist/（独立产物 + 字体）。
-      # registry 与 access 来自 package.json 的 publishConfig；凭据由 OIDC 现场换取。
-      # 想同时生成构建溯源，把命令换成 `npm publish --provenance`。
-      - name: 发布到 npm
-        working-directory: packages/design-system
-        run: npm publish
-
-      - name: 确认 registry 上的版本
-        run: npm view @hsinyau/design-system version
+          npm install -g npm@^11.5.1
+          npm --version
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+      - name: 发布
+        uses: changesets/action/publish@v2
+        with:
+          pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
+          create-github-releases: true

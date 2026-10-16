@@ -66,7 +66,8 @@ apps/docs/
 └── src/styles/docs-shell.css 文档站外壳（不参与组件体系）
 
 wrangler.jsonc               Cloudflare 部署配置（assets 指向 apps/docs/dist）
-.github/workflows/publish.yml 打 tag 发布 npm 包
+.changeset/                  变更记录（changesets 用，含 changelog 生成配置）
+.github/workflows/publish.yml 发布流程：changesets + npm Trusted Publishing
 scripts/check-tokens.mjs     一致性检查
 scripts/check-classes.mjs    类名交叉审计
 docs/CONVENTIONS.md          实现约定（新增组件前必读）
@@ -100,30 +101,37 @@ pnpm build                        # 文档站静态构建
 
 ## 发布库
 
-推荐走 GitHub Action（[`.github/workflows/publish.yml`](.github/workflows/publish.yml)）：**打 tag 即发布**，
-tag 去掉 `v` 前缀后必须等于包版本。认证用 npm 的 Trusted Publishing（OIDC）——仓库里不保存任何 npm
-token，凭据是 CI 现场换取的短期凭证，只对本仓库的这个 workflow 文件有效。
+发布由 [changesets](https://changesets.dev) 托管：不手动改版本，也不手动打 tag。
+
+日常只在有改动的 PR 里写一个 changeset：
 
 ```bash
-# 1. 改 packages/design-system/package.json 的 version 并提交
-# 2. 打 tag 推上去，剩下的交给 CI
-git tag v0.1.1 && git push origin v0.1.1
+pnpm changeset           # 选 patch / minor / major，并写变更说明
+pnpm changeset --empty    # 只想合并、不想发版本时用它
 ```
 
-一次性配置在 npm 网站上做：`@hsinyau/design-system` → Settings → Trusted Publisher → GitHub Actions，
-填 Organization or user `hsinyau`、Repository `design-system`、Workflow filename `publish.yml`
-（只填文件名，不要带路径），Environment name 留空；**Allowed actions 里要勾上 `npm publish`**——
-默认只允许 `npm stage publish`，不勾发布会失败。
+push 到 main 后，[`.github/workflows/publish.yml`](.github/workflows/publish.yml) 会按 changesets 的模式分流：
 
-CI 会先跑 `check:tokens`、`check:classes` 与文档站构建，核对 tag 与包版本一致后执行 `npm publish`
-（`prepublishOnly` 负责重建 `dist/`）。也可在 Actions 页面手动触发。
+1. 有未发布的 changeset → 自动开 / 更新 **Version Packages** PR（里面写好了新版本号与 CHANGELOG）；
+2. 合并该 PR（即又一次 push main）→ 直接发布到 npm，并打 tag、建 GitHub Release。
 
-本地手动发布：
+认证走 npm 的 **Trusted Publishing（OIDC）**，仓库里不保存任何 npm token。一次性配置：
+
+- **npm**：`@hsinyau/design-system` → Settings → Trusted Publisher → GitHub Actions，填
+  Organization or user `hsinyau`、Repository `design-system`、Workflow filename `publish.yml`
+  （只填文件名），Environment name 留空；**Allowed actions 里勾上 `npm publish`**；
+- **GitHub**：仓库 Settings → Actions → General 里允许 "Allow GitHub Actions to create and approve
+  pull requests"，否则 CI 开不出 Version Packages PR。
+
+workflow 按官方建议拆成 select-mode / version / pack / publish 四段，`id-token: write` 只给最后那个
+真正执行发布的 job。
+
+应急时也可以本地手动发布：
 
 ```bash
-pnpm build:lib                                          # 先生成 dist/
-npm pack --dry-run --workspace packages/design-system    # 检查包内文件
-pnpm --filter @hsinyau/design-system publish            # 需要先 npm login
+pnpm changeset version        # 把 changeset 落成版本号与 CHANGELOG
+pnpm build:lib
+pnpm --filter @hsinyau/design-system publish
 ```
 
 包内只包含 `src/styles`（含字体与许可证）、`dist/`、`README.md`、`LICENSE`，文档站不会被发布。

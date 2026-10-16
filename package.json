@@ -10,6 +10,12 @@
     "check": "pnpm --filter @hsinyau/docs check && pnpm run check:tokens && pnpm run check:classes",
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:classes": "node scripts/check-classes.mjs",
-    "typecheck": "pnpm --filter @hsinyau/docs typecheck"
+    "typecheck": "pnpm --filter @hsinyau/docs typecheck",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3"
   }
 }
