@@ -101,7 +101,8 @@ pnpm build                        # 文档站静态构建
 ## 发布库
 
 推荐走 GitHub Action（[`.github/workflows/publish.yml`](.github/workflows/publish.yml)）：**打 tag 即发布**，
-tag 去掉 `v` 前缀后必须等于包版本。
+tag 去掉 `v` 前缀后必须等于包版本。认证用 npm 的 Trusted Publishing（OIDC）——仓库里不保存任何 npm
+token，凭据是 CI 现场换取的短期凭证，只对本仓库的这个 workflow 文件有效。
 
 ```bash
 # 1. 改 packages/design-system/package.json 的 version 并提交
@@ -109,13 +110,13 @@ tag 去掉 `v` 前缀后必须等于包版本。
 git tag v0.1.1 && git push origin v0.1.1
 ```
 
-CI 会先跑 `check:tokens`、`check:classes` 与文档站构建，核对 tag 与包版本一致后执行
-`pnpm --filter @hsinyau/design-system publish`（`prepublishOnly` 负责重建 `dist/`）。也可以在
-Actions 页面手动触发。
+一次性配置在 npm 网站上做：`@hsinyau/design-system` → Settings → Trusted Publisher → GitHub Actions，
+填 Organization or user `hsinyau`、Repository `design-system`、Workflow filename `publish.yml`
+（只填文件名，不要带路径），Environment name 留空；**Allowed actions 里要勾上 `npm publish`**——
+默认只允许 `npm stage publish`，不勾发布会失败。
 
-需要先在仓库 Secrets 里配置 `NPM_TOKEN`：npm 网站 → Access Tokens → Granular Access Token，
-权限至少 `Package: Read and write`，并允许 `@hsinyau` scope 与 publish。想改用 npm 的
-Trusted Publishing（不存长期 token）时，按 workflow 顶部注释删掉 `NODE_AUTH_TOKEN` 一行即可。
+CI 会先跑 `check:tokens`、`check:classes` 与文档站构建，核对 tag 与包版本一致后执行 `npm publish`
+（`prepublishOnly` 负责重建 `dist/`）。也可在 Actions 页面手动触发。
 
 本地手动发布：
 

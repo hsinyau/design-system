@@ -4,14 +4,21 @@ name: publish
 #   git tag v0.1.1 && git push origin v0.1.1
 # 也可以在 Actions 页面手动触发（用 package.json 当前版本；该版本已存在时 npm 会拒绝）。
 #
-# 认证：需要在仓库 Secrets 里配置 NPM_TOKEN —— npm 网站 → Access Tokens →
-# Generate New Token → Granular Access Token，权限至少 Package: Read and write，
-# 并允许 @hsinyau scope 与 publish。
+# 认证走 npm 的 Trusted Publishing（OIDC）：仓库里不保存任何 npm token，
+# 凭据由 GitHub Actions 的 id-token 现场换取，只对本仓库的这个 workflow 文件有效。
 #
-# 若改用 npm 的 Trusted Publishing（不需要长期 token）：在 npm 包设置里把发布者绑定到
-# 本仓库的这个 workflow 文件，然后删掉下面「发布到 npm」步骤里的 NODE_AUTH_TOKEN 一行，
-# 保留顶部的 id-token: write 权限即可；再把 `--provenance` 追加到发布命令后面可同时生成
-# 构建溯源。
+# 一次性配置（在 npm 网站上做）：
+#   @hsinyau/design-system → Settings → Trusted Publisher → GitHub Actions
+#     Organization or user: hsinyau
+#     Repository:           design-system
+#     Workflow filename:    publish.yml     （只填文件名，不要带 .github/workflows/ 路径）
+#     Environment name:     留空            （本 workflow 不使用 GitHub environment）
+#     Allowed actions:      勾上 npm publish（默认只允许 npm stage publish，不勾会发布失败）
+#
+# 两个硬性要求（都在下面处理了）：
+#   - npm CLI ≥ 11.5.1：Node 22 自带的 npm 版本不够，所以显式升级；
+#   - 不要给 setup-node 传 registry-url：它会写入 //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}，
+#     与环境里不存在的 token 变量组合容易干扰 OIDC 认证；registry 由包内 publishConfig.registry 指定。
 on:
   push:
     tags:
@@ -20,7 +27,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # provenance / Trusted Publishing 需要
+  id-token: write # OIDC 换取 npm 短期凭据，必须
 
 concurrency:
   group: publish-npm
@@ -43,8 +50,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
           cache: pnpm
+
+      - name: 升级 npm（Trusted Publishing 需要 npm >= 11.5.1）
+        run: |
+          npm install -g npm@^11.5.1
+          npm --version
 
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
@@ -66,11 +77,12 @@ jobs:
             exit 1
           fi
 
-      # prepublishOnly 会自动重建 dist/（独立产物 + 字体），再交由 npm 打包发布
+      # 在包目录里发布：prepublishOnly 会自动重建 dist/（独立产物 + 字体）。
+      # registry 与 access 来自 package.json 的 publishConfig；凭据由 OIDC 现场换取。
+      # 想同时生成构建溯源，把命令换成 `npm publish --provenance`。
       - name: 发布到 npm
-        run: pnpm --filter @hsinyau/design-system publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        working-directory: packages/design-system
+        run: npm publish
 
       - name: 确认 registry 上的版本
         run: npm view @hsinyau/design-system version
