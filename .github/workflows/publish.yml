@@ -137,7 +137,13 @@ jobs:
         with:
           publish-plan-artifact-id: ${{ needs.select-mode.outputs.publish-plan-artifact-id }}
 
-  # 唯一带 id-token 的 job：用 OIDC 发布，再打 tag、建 Release
+  # 唯一带 id-token 的 job：用 OIDC 发布，再打 tag、建 Release。
+  #
+  # 一个隐藏前提：changesets 按仓库类型选发布工具，pnpm workspace 里固定走 `pnpm publish`。
+  # pnpm v11 起 publish 改为自身实现、不再委托 npm CLI，而 pnpm 目前不支持 npm 的
+  # Trusted Publishing。所以这里把 pnpm 钉在 10.x —— 它会把 publish 委托给 npm CLI，
+  # 由 npm（>= 11.5.1）完成 OIDC 换证。将来要升级 pnpm 大版本时，得先把这几步换成
+  # `npm publish` 直发。
   publish:
     name: 发布到 npm（OIDC）
     needs: pack
@@ -166,6 +172,12 @@ jobs:
           npm --version
       - name: 安装依赖
         run: pnpm install --frozen-lockfile
+      # 排查 OIDC 认证用：确认 npm 版本够用，且 id-token 权限真的注入到了环境变量
+      - name: 发布前诊断
+        run: |
+          echo "npm: $(npm --version)"
+          echo "pnpm: $(pnpm --version)"
+          node -e "console.log('OIDC:', process.env.ACTIONS_ID_TOKEN_REQUEST_URL ? 'available' : 'MISSING (检查本 job 的 id-token: write)')"
       - name: 发布
         uses: changesets/action/publish@v2
         with:
