@@ -1,0 +1,337 @@
+/* =============================================================
+   zz design system · prose & code
+   -------------------------------------------------------------
+   长文区（.zz-prose）与代码展示（.zz-code）。
+
+   正文 15px / 1.65 行高，最大宽度 --zz-measure；标题回落 sans 600、
+   字距 -0.01em、上间距 2em；行内 code 用 --zz-surface-2，整块代码
+   用 --zz-bg-deep 凹槽 + --zz-elevation 描边。
+
+   分层提醒：base.css 的 `h1–h6` / `p` / `code,kbd,pre` / `hr` 默认值
+   写在 @layer 之外，而未分层声明优先于任何 @layer —— 所以文中所有
+   与这些元素默认值抢属性的规则统一放在本文件末尾的「层外」段，
+   层内写会被静默吃掉。
+   ============================================================= */
+
+@layer components {
+  /* ---------------------------------------------------------- 长文容器 */
+
+  .zz-prose {
+    max-width: var(--zz-measure);
+    color: var(--zz-text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+
+  /* ---------------------------------------------------------- 提示块 */
+
+  .zz-prose__callout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin: 0 0 1.25em;
+    /* 引用/提示块是唯一用 2px 左线的地方 */
+    border-left: 2px solid var(--zz-brand);
+    background: var(--zz-surface);
+    padding: 0.75rem 1rem;
+    color: var(--zz-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .zz-prose__callout__title {
+    color: var(--zz-text);
+    font-family: var(--zz-font-sans);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .zz-prose__callout--info {
+    border-left-color: var(--zz-info);
+  }
+
+  .zz-prose__callout--warning {
+    border-left-color: var(--zz-warning);
+  }
+
+  .zz-prose__callout--danger {
+    border-left-color: var(--zz-danger);
+  }
+
+  .zz-prose__callout--success {
+    border-left-color: var(--zz-success);
+  }
+
+  /* 中性说明：把品牌色左线退回控件级描边 */
+  .zz-prose__callout--note {
+    border-left-color: var(--zz-border-strong);
+  }
+
+  /* ---------------------------------------------------------- 代码块 */
+
+  .zz-code {
+    border: 1px solid var(--zz-border-subtle);
+    background: var(--zz-bg-deep);
+    box-shadow: var(--zz-elevation);
+  }
+
+  .zz-prose .zz-code {
+    margin: 0 0 1.25em;
+  }
+
+  .zz-code__head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--zz-border-subtle);
+    padding: 0.5rem 1rem;
+    color: var(--zz-text-muted);
+    font-family: var(--zz-font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+
+  .zz-code__lang {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .zz-code__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+  }
+
+  .zz-code__lines {
+    display: block;
+  }
+
+  .zz-code__line {
+    display: block;
+    white-space: pre;
+  }
+
+  /* 行号用 CSS 计数器生成，避免把数字写进可复制的内容里 */
+  .zz-code--numbered .zz-code__lines {
+    counter-reset: zz-code-line;
+  }
+
+  .zz-code--numbered .zz-code__line {
+    counter-increment: zz-code-line;
+  }
+
+  .zz-code--numbered .zz-code__line::before {
+    display: inline-block;
+    width: 2ch;
+    margin-right: 1rem;
+    color: var(--zz-text-muted);
+    content: counter(zz-code-line);
+    text-align: end;
+    user-select: none;
+  }
+
+  /* 语法着色只有两个色相：青（键名/关键字）与橙（数字/字面量） */
+  .zz-tok-key {
+    color: var(--zz-code-key);
+  }
+
+  .zz-tok-num {
+    color: var(--zz-code-number);
+  }
+
+  .zz-tok-muted {
+    color: var(--zz-text-muted);
+  }
+}
+
+/* ---------------------------------------------------------------
+   层外：与 base.css 未分层元素默认值直接竞争的部分
+   （h1–h6 的字号与外边距、p 的外边距、a 的下划线、code/pre/kbd 的字号、
+   hr 的外边距）。写在这里才能生效；本段顺序上晚于同特异性的其它规则。
+   --------------------------------------------------------------- */
+
+.zz-prose h2,
+.zz-prose h3,
+.zz-prose h4 {
+  margin: 2em 0 0.6em;
+  color: var(--zz-text);
+  font-family: var(--zz-font-sans);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.zz-prose h2 {
+  font-size: 1.25rem;
+}
+
+.zz-prose h3 {
+  font-size: 1.05rem;
+}
+
+.zz-prose h4 {
+  font-size: 0.9375rem;
+}
+
+/* 首个子元素不吃上边距（标题的 2em 在开头会顶出一个空洞） */
+.zz-prose > :first-child {
+  margin-top: 0;
+}
+
+.zz-prose p {
+  margin: 0 0 1em;
+}
+
+.zz-prose a {
+  color: var(--zz-text);
+  text-decoration: underline;
+  text-decoration-color: var(--zz-brand);
+  text-decoration-skip-ink: auto;
+  text-underline-offset: 0.25em;
+  transition-property: color;
+  transition-duration: var(--zz-dur);
+  transition-timing-function: var(--zz-ease);
+}
+
+.zz-prose a:hover {
+  color: var(--zz-brand);
+}
+
+.zz-prose strong {
+  color: var(--zz-text);
+  font-weight: 600;
+}
+
+.zz-prose ul,
+.zz-prose ol {
+  margin: 0 0 1em;
+  padding-inline-start: 1.25em;
+}
+
+/* 直角语言里方点比圆点更贴：标记只做层级提示，所以用 muted */
+.zz-prose ul {
+  list-style-type: square;
+}
+
+.zz-prose li + li {
+  margin-top: 0.25em;
+}
+
+.zz-prose li::marker {
+  color: var(--zz-text-muted);
+}
+
+.zz-prose blockquote {
+  margin: 0 0 1.25em;
+  border-left: 2px solid var(--zz-brand);
+  padding: 0.125em 0 0.125em 1em;
+  color: var(--zz-text-secondary);
+}
+
+.zz-prose hr {
+  margin: 2em 0;
+}
+
+.zz-prose img {
+  margin-bottom: 1em;
+  outline: 1px solid var(--zz-img-outline);
+  outline-offset: -1px;
+}
+
+.zz-prose figure {
+  margin: 0 0 1em;
+}
+
+.zz-prose figcaption {
+  margin-top: 0.5rem;
+  color: var(--zz-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.zz-prose kbd {
+  border: 1px solid var(--zz-border-strong);
+  border-bottom-width: 2px;
+  background: var(--zz-surface-2);
+  padding: 0.125rem 0.375rem;
+  color: var(--zz-text-secondary);
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+
+.zz-prose code {
+  background: var(--zz-surface-2);
+  padding: 0.125rem 0.3125rem;
+  color: var(--zz-text);
+  font-size: 0.86em;
+}
+
+.zz-prose pre {
+  overflow-x: auto;
+  margin: 0 0 1.25em;
+  background: var(--zz-bg-deep);
+  box-shadow: var(--zz-elevation);
+  padding: 1em 1.25em;
+  color: var(--zz-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  scrollbar-width: thin;
+  scrollbar-color: var(--zz-scroll-thumb) transparent;
+}
+
+.zz-prose pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* 裸表格（例如由 Markdown 生成）：.zz-table 有自己的规则，这里排除掉 */
+.zz-prose table:not(.zz-table) {
+  width: 100%;
+  margin: 0 0 1.25em;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.zz-prose table:not(.zz-table) :is(th, td) {
+  border: 1px solid var(--zz-border-subtle);
+  padding: 0.5em 0.75em;
+  text-align: start;
+}
+
+.zz-prose table:not(.zz-table) th {
+  background: var(--zz-surface);
+  color: var(--zz-text);
+  font-family: var(--zz-font-sans);
+  font-weight: 600;
+}
+
+/* 提示块内部不要再叠一层正文外边距 */
+.zz-prose__callout > :is(p, ul, ol, pre, blockquote, table, figure) {
+  margin: 0;
+}
+
+.zz-code__pre {
+  overflow-x: auto;
+  margin: 0;
+  padding: 1em 1.25em;
+  color: var(--zz-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  scrollbar-width: thin;
+  scrollbar-color: var(--zz-scroll-thumb) transparent;
+}
+
+.zz-code__code {
+  color: inherit;
+  font-family: var(--zz-font-mono);
+  font-size: inherit;
+  /* 每行自己带 white-space: pre（保留缩进），外层归零后
+     slot 里的 .zz-code__line 可以正常换行书写，不会多出空行。 */
+  white-space: normal;
+}

@@ -7,9 +7,9 @@
 - 系统名：`zz`。CSS 变量前缀 `--zz-*`，类名前缀 `zz-`。
 - 类名扁平、语义化：`.zz-btn`、`.zz-btn--outline`、`.zz-card__media`（BEM 的 `--` 变体 / `__` 元素）。
 - 每个组件一组文件：
-  - 样式：`src/styles/components/<name>.css`
-  - 组件：`src/components/ui/<Name>.astro`
-  - 文档页：`src/pages/components/<name>.astro`
+  - 样式：`packages/design-system/src/styles/components/<name>.css`（随包发布）
+  - 组件：`apps/docs/src/components/ui/<Name>.astro`（文档站封装，不进包）
+  - 文档页：`apps/docs/src/pages/components/<name>.astro`
 
 ## 颜色
 
@@ -33,7 +33,8 @@
 
 ## 排版
 
-- 默认字体是 **等宽**（`--font-mono`）；只有标题、卡片标题、表头、统计大数字、显式 UI 标签用 `--font-sans`。
+- 默认字体是 **等宽**（`--zz-font-mono`）；只有标题、卡片标题、表头、统计大数字、显式 UI 标签用 `--zz-font-sans`。
+  不要引用 Tailwind 生成的 `--font-sans` / `--font-mono`（非 Tailwind 环境里不存在），`check:tokens` 会拦。
 - 角色配方：
   - 页面 H1：`1.75rem–2.25rem`，sans，`font-weight 600`，`letter-spacing -0.015em`
   - 区块 H2：`1.5rem` sans 600

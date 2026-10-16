@@ -2,20 +2,28 @@
  * 设计系统一致性检查。
  *
  * 1. 除 tokens.css 外，任何样式或组件里不得出现十六进制色值。
- * 2. 不得在组件层引用 --color-zz-*（那是 Tailwind 工具类专用的 inline token）。
- * 3. 组件层不得使用裸 z-index 数值。
- * 4. 不得出现 border-radius 的非零值（圆形头像的 50% 是唯一例外）。
+ * 2. 不得引用 --color-zz-*（那是 Tailwind 工具类专用的 inline token）。
+ * 3. 不得引用 Tailwind 生成的 --font-sans / --font-mono（用 --zz-font-*）。
+ * 4. 组件层不得使用裸 z-index 数值。
+ * 5. 不得出现 border-radius 的非零值（圆形头像的 50% 是唯一例外）。
+ *
+ * 扫描范围：库（packages/design-system/src/styles）+ 文档站（apps/docs/src）。
  *
  * 用法：node scripts/check-tokens.mjs
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { join } from 'node:path'
 
 const root = new URL('..', import.meta.url).pathname
-const scanDirs = ['src/styles', 'src/components', 'src/layouts', 'src/pages']
+const scanDirs = [
+  'packages/design-system/src/styles',
+  'apps/docs/src/components',
+  'apps/docs/src/layouts',
+  'apps/docs/src/pages',
+]
 
-/** 允许出现色值的文件（token 定义处与独立静态资源）。 */
-const allowlist = new Set(['src/styles/tokens.css'])
+/** 允许出现色值的文件（token 定义处）。 */
+const allowlist = new Set(['packages/design-system/src/styles/tokens.css'])
 
 function walk(dir) {
   const out = []
@@ -50,6 +58,12 @@ for (const dir of scanDirs) {
       // inline token 误用
       if (line.includes('--color-zz-') && !rel.endsWith('.astro')) {
         problems.push(`${at}  组件层引用了 --color-zz-*，请改用 --zz-*`)
+      }
+
+      // Tailwind 生成的字体变量：非 Tailwind 环境下不存在，库内不得引用
+      const fontVar = line.match(/var\(--font-(sans|mono)\)/)
+      if (fontVar) {
+        problems.push(`${at}  引用了 Tailwind 生成的 --font-${fontVar[1]} —— 请改用 var(--zz-font-${fontVar[1]})`)
       }
 
       // 裸 z-index 数值（允许 var()、0、auto 与层内比较用的 1/-1）

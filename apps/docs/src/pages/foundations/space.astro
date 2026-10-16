@@ -1,0 +1,390 @@
+---
+import Docs from '@/layouts/Docs.astro'
+import Avatar from '@/components/ui/Avatar.astro'
+
+interface StepRow {
+  step: string
+  value: string
+  use: string
+}
+
+/** 间距刻度：Tailwind 默认 --spacing: 0.25rem，未覆盖。 */
+const steps: StepRow[] = [
+  { step: '1', value: '0.25rem', use: '图标与文字之间、极紧凑堆叠' },
+  { step: '2', value: '0.5rem', use: '行内元素间距、按钮内 gap' },
+  { step: '3', value: '0.75rem', use: '表单标签到控件、示例行间距、表格行内距' },
+  { step: '4', value: '1rem', use: '卡片内距、区块内段落间距、舞台内距' },
+  { step: '6', value: '1.5rem', use: '两栏间隙、示例舞台大内距' },
+  { step: '8', value: '2rem', use: '卡片网格间距、段落群之间' },
+  { step: '12', value: '3rem', use: '区块分隔前的留白、主栅格列间距' },
+  { step: '16', value: '4rem', use: '页面级分块' },
+  { step: '24', value: '6rem', use: '首屏 section 的桌面垂直节奏' },
+]
+
+interface RhythmRow {
+  place: string
+  value: string
+  note: string
+}
+
+const rhythm: RhythmRow[] = [
+  { place: '内页内容列', value: '2.5rem', note: '桌面 3rem；底部收尾 4rem / 桌面 5rem' },
+  { place: '首页 section', value: '3rem', note: '桌面放大到 6rem–7rem' },
+  { place: '页脚', value: '3.5rem', note: '垂直内距，左右与内容列对齐' },
+  { place: '区块分隔', value: '3rem + 1px', note: '上外边距 3rem、1px 上边框、再 1.5rem 内距' },
+]
+
+interface StrokeRow {
+  use: string
+  value: string
+  token: string
+}
+
+const strokes: StrokeRow[] = [
+  { use: '发丝分隔', value: '1px solid', token: '--zz-border-subtle' },
+  { use: '控件描边', value: '1px solid', token: '--zz-border-strong' },
+  { use: '强调容器', value: '2px solid', token: '--zz-border-strong' },
+  { use: '引用 / 提示块左线', value: '2px solid', token: '--zz-brand 或状态色' },
+]
+
+interface ZRow {
+  layer: string
+  token: string
+  value: string
+  use: string
+}
+
+const layers: ZRow[] = [
+  { layer: 'nav', token: '--zz-z-nav', value: '100', use: '顶栏、吸顶导航' },
+  { layer: 'dropdown', token: '--zz-z-dropdown', value: '200', use: '下拉、提示卡、选择器' },
+  { layer: 'modal', token: '--zz-z-modal', value: '300', use: '模态、搜索面板、遮罩层' },
+  { layer: 'tooltip', token: '--zz-z-tooltip', value: '400', use: 'tooltip 及所有浮在最上的提示' },
+]
+---
+
+<Docs title="间距与层级" description="zz design system 的间距刻度、容器规范、垂直节奏、描边与 z-index 阶梯。">
+  <span class="zz-doc__eyebrow">基础 / 布局</span>
+  <h1 class="zz-doc__title">间距与层级</h1>
+  <p class="zz-doc__lede">
+    间距用一个 0.25rem 基准的九档刻度，容器只有一条 72rem 的线，层级用 1px 描边而不是投影，
+    z-index 只有四档。所有值都写成 rem，因为它们要跟着根字号一起缩放。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>间距刻度</h2>
+    <p>刻度以 0.25rem 为基准（Tailwind 默认 <code>--spacing</code>，未覆盖）。下面的条带就是每档的实际宽度。</p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-scale">
+        {
+          steps.map((row) => (
+            <div class="zz-scale__row">
+              <span class="zz-scale__label">{row.step}</span>
+              <span class="zz-scale__bar" style={`width: ${row.value}`} />
+              <span class="zz-scale__value">{row.value}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>档位</th><th>值</th><th>用途</th></tr>
+      </thead>
+      <tbody>
+        {
+          steps.map((row) => (
+            <tr>
+              <td><code>{row.step}</code></td>
+              <td><code>{row.value}</code></td>
+              <td>{row.use}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <h3 class="zz-subhead">组件内距</h3>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>组件</th><th>内距</th><th>备注</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>卡片</td><td><code>1rem</code></td><td>四面相同；紧凑卡片可降到 <code>0.75rem</code></td></tr>
+        <tr><td>按钮</td><td><code>10 / 12 / 16 / 20px</code></td><td>对应 xs / sm / md / lg 的横向内距，高度 32 / 36 / 40 / 44px</td></tr>
+        <tr><td>图标按钮</td><td><code>0</code></td><td>正方形，内距归零</td></tr>
+        <tr><td>表单控件</td><td><code>0.625rem 0.75rem</code></td><td>纵向 10px、横向 12px</td></tr>
+        <tr><td>表格单元格</td><td><code>0.5rem 0.75rem 0.5rem 0</code></td><td>左侧不留白，靠列对齐</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>容器</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>对象</th><th>值</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>页面内容最大宽</td><td><code>72rem</code></td><td>顶栏、内容列、页脚共用同一条线</td></tr>
+        <tr><td>横向内距</td><td><code>1rem</code></td><td>40rem 起升到 <code>1.5rem</code></td></tr>
+        <tr><td>正文最大宽</td><td><code>var(--zz-measure)</code> · 48rem</td><td>长文与 lede 用，比容器窄</td></tr>
+        <tr><td>顶栏高度</td><td><code>var(--zz-nav-h)</code></td><td><code>calc(3.5rem + env(safe-area-inset-top, 0px))</code>，锚点偏移也引用它</td></tr>
+        <tr><td>文档侧栏</td><td><code>15rem</code></td><td>64rem 起出现，与内容列间距 3rem</td></tr>
+      </tbody>
+    </table>
+    <p class="zz-doc__note">
+      横向内距只写两档，不要为某个断点临时插 1.25rem；<code>72rem</code> 之外也不加第二层容器宽度。
+      内容超过 <code>var(--zz-measure)</code> 时靠增列解决，不靠加宽正文。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>垂直节奏</h2>
+    <p>区块之间的留白只有这四档，上下不对称是刻意的：底部留得多，滚动到底时不会觉得被截断。</p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>场合</th><th>垂直内距</th><th>备注</th></tr>
+      </thead>
+      <tbody>
+        {
+          rhythm.map((row) => (
+            <tr>
+              <td>{row.place}</td>
+              <td><code>{row.value}</code></td>
+              <td>{row.note}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="zz-doc__note">
+      区块分隔统一是「<code>margin-top: 3rem</code> + <code>border-top: 1px solid var(--zz-border-subtle)</code> +
+      <code>padding-top: 1.5rem</code>」，本页每个 section 就是这个组合。不要用背景色划分区块——颜色变化留给悬停面。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>边框与层级</h2>
+    <p>
+      "浮起"靠的是零模糊的外描边，不是投影：深色主题下 <code>--zz-elevation</code> 是
+      <code>0 0 0 1px oklch(1 0 0 / 0.07)</code>，hover 时同一几何只把透明度升到 0.13，所以不会跳动。
+      亮色主题下描边不足以表达层级，才额外叠一层极轻的真实投影。这两个值都装在 token 里，
+      组件只写 <code>box-shadow: var(--zz-elevation)</code>，不判断主题。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-elev">
+        <div class="zz-elev__box zz-elevation">
+          <p class="zz-elev__title">静态面板</p>
+          <p class="zz-elev__meta">box-shadow: var(--zz-elevation)</p>
+        </div>
+        <div class="zz-elev__box zz-elevation-hover">
+          <p class="zz-elev__title">可交互面板</p>
+          <p class="zz-elev__meta">悬停这里 → 描边升到 --zz-elevation-hover</p>
+        </div>
+      </div>
+    </div>
+    <p class="zz-doc__note">
+      外描边画在盒子外侧，父级 <code>overflow: hidden</code> 会把它裁掉；这类卡片要么不裁，要么把描边换成
+      <code>border-strong</code> 的实边框。深色主题下面板底仍用 <code>--zz-surface</code>，不要为了"浮起"再加边框。
+    </p>
+    <h3 class="zz-subhead">描边宽度规范</h3>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>用途</th><th>宽度</th><th>颜色</th></tr>
+      </thead>
+      <tbody>
+        {
+          strokes.map((row) => (
+            <tr>
+              <td>{row.use}</td>
+              <td><code>{row.value}</code></td>
+              <td><code>{row.token}</code></td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-edges">
+        <p class="zz-edges__hairline">1px 发丝线：分隔内容</p>
+        <button class="zz-edges__control" type="button">1px 控件描边</button>
+        <div class="zz-edges__emphasis">2px 强调容器</div>
+        <blockquote class="zz-edges__quote">2px 左线：引用与提示</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>z-index 阶梯</h2>
+    <p>
+      只有四档，全部通过 <code>var(--zz-z-*)</code> 消费。任何裸数值都会被一致性检查
+      （<code>scripts/check-tokens.mjs</code>）拦下。
+    </p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>层</th><th>token</th><th>值</th><th>使用者</th></tr>
+      </thead>
+      <tbody>
+        {
+          layers.map((row) => (
+            <tr>
+              <td>{row.layer}</td>
+              <td><code>{row.token}</code></td>
+              <td><code>{row.value}</code></td>
+              <td>{row.use}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <pre class="zz-doc__code"><code>{`.zz-topbar  { z-index: var(--zz-z-nav); }
+.zz-dropdown{ z-index: var(--zz-z-dropdown); }
+.zz-modal   { z-index: var(--zz-z-modal); }
+.zz-tooltip { z-index: var(--zz-z-tooltip); }`}</code></pre>
+    <p class="zz-doc__note">
+      层内比较（例如按钮组里被 hover 的那一个）允许 <code>1</code> / <code>-1</code>，
+      因为那只在同一个层内决定谁盖住谁；一旦要跨层，就必须往上取一档。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>圆角</h2>
+    <p>
+      全部直角。8 个 Tailwind 圆角档位 <code>--radius-xs</code> 到 <code>--radius-4xl</code> 都被写成
+      <code>0px</code>，所以 <code>rounded-*</code> 工具类不会产生任何弧度，也不需要逐个元素去写
+      <code>border-radius: 0</code>。
+    </p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-radius">
+        <div>
+          <div class="zz-radius__square"></div>
+          <p class="zz-radius__label">所有容器、按钮、输入框：直角（无 border-radius）</p>
+        </div>
+        <div>
+          <Avatar initials="zz" size="xl" />
+          <p class="zz-radius__label">唯一例外：圆形头像 border-radius: 50%</p>
+        </div>
+      </div>
+    </div>
+    <p class="zz-doc__note">
+      直角意味着层级必须由描边与底色承担，不能靠圆角和投影堆叠"卡片感"；一个页面里同时出现的描边种类不超过两种。
+      头像用 <code>.zz-avatar</code>，是这条规则唯一的例外（徽章上的状态点用 <code>50%</code> 表达"圆"，
+      因为方点传达不了状态）。
+    </p>
+  </section>
+
+  <style>
+    .zz-subhead {
+      margin-top: 2rem;
+      font-size: 1rem;
+    }
+
+    .zz-scale {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .zz-scale__row {
+      display: grid;
+      grid-template-columns: 2rem 8rem 6rem;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .zz-scale__label,
+    .zz-scale__value {
+      color: var(--zz-text-muted);
+      font-family: var(--zz-font-mono);
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .zz-scale__bar {
+      height: 0.75rem;
+      background: var(--zz-brand);
+    }
+
+    .zz-elev {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    }
+
+    .zz-elev__box {
+      background: var(--zz-surface);
+      padding: 1rem;
+    }
+
+    .zz-elev__title {
+      color: var(--zz-text);
+      font-size: 0.875rem;
+    }
+
+    .zz-elev__meta {
+      margin-top: 0.5rem;
+      color: var(--zz-text-muted);
+      font-family: var(--zz-font-mono);
+      font-size: 0.75rem;
+    }
+
+    .zz-edges {
+      display: grid;
+      gap: 1rem;
+      align-items: center;
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    }
+
+    .zz-edges__hairline {
+      border-top: 1px solid var(--zz-border-subtle);
+      border-bottom: 1px solid var(--zz-border-subtle);
+      padding-block: 0.625rem;
+      color: var(--zz-text-secondary);
+      font-size: 0.8125rem;
+    }
+
+    .zz-edges__control {
+      border: 1px solid var(--zz-border-strong);
+      background: var(--zz-surface);
+      padding: 0.625rem 0.75rem;
+      color: var(--zz-text);
+      font-family: var(--zz-font-mono);
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+
+    .zz-edges__emphasis {
+      border: 2px solid var(--zz-border-strong);
+      padding: 0.5rem 0.75rem;
+      color: var(--zz-text);
+      font-size: 0.8125rem;
+    }
+
+    .zz-edges__quote {
+      margin: 0;
+      border-left: 2px solid var(--zz-brand);
+      padding: 0.25rem 0 0.25rem 0.75rem;
+      color: var(--zz-text-secondary);
+      font-size: 0.8125rem;
+    }
+
+    .zz-radius {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    }
+
+    .zz-radius__square {
+      width: 3rem;
+      height: 3rem;
+      border: 1px solid var(--zz-border-strong);
+      background: var(--zz-surface-2);
+    }
+
+    .zz-radius__label {
+      margin-top: 0.75rem;
+      max-width: var(--zz-measure);
+      color: var(--zz-text-muted);
+      font-size: 0.75rem;
+      line-height: 1.6;
+    }
+  </style>
+</Docs>

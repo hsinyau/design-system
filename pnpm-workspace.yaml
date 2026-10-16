@@ -1,16 +1,16 @@
-# Cloudflare 的构建镜像用 pnpm 10.11.1，本地开发用 pnpm 12.6.0，两者行为有差异，
-# 这个文件要同时满足双方：
+# pnpm workspace 根。
 #
-# - `packages: []`：pnpm 10 要求 workspace 文件必须有 packages 字段，缺了会直接
-#   报错 "packages field missing or empty" 并中断安装。pnpm 12 则不需要。
-# - `allowBuilds: esbuild: true`：pnpm 12 把"依赖的构建脚本被忽略"视为安装失败
-#   （ERR_PNPM_IGNORED_BUILDS，退出码 1），这里显式放行 esbuild。
-#   pnpm 10.11.1 也接受该字段（已实测）。
+# - apps/docs：文档站（private，不发布），构建产物 apps/docs/dist。
+# - packages/design-system：发布到 npm 的库，只含样式层。
 #
-# 因为有 packages 字段，pnpm 会把这个目录视为 workspace 根，部署工具在根目录
-# 执行 `pnpm add` 时会被 ERR_PNPM_ADDING_TO_ROOT 拦下 —— 由 .npmrc 里的
-# ignore-workspace-root-check 放行。
-packages: []
+# Cloudflare 的构建镜像用 pnpm 10.11.1，本地开发用 pnpm 12.6.0，两者行为有差异：
+# pnpm 10 要求这个文件必须有 packages 字段（缺了会报 "packages field missing
+# or empty" 并中断安装），pnpm 12 则不需要 —— 这里两者都满足。
+# 另外 pnpm 12 把"依赖的构建脚本被忽略"视为安装失败（ERR_PNPM_IGNORED_BUILDS），
+# 显式放行 esbuild；pnpm 10.11.1 也接受该字段（已实测）。
+packages:
+  - apps/*
+  - packages/*
 
 allowBuilds:
   esbuild: true

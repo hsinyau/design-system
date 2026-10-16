@@ -1,0 +1,17 @@
+/* =============================================================
+   zz design system · 文档站入口
+   -------------------------------------------------------------
+   顺序即层序来源：Tailwind 先声明 theme → base → components →
+   utilities，之后导入的库样式才会落进对应的层里。
+
+   库入口（@hsinyau/design-system/styles.css）通过包名而不是相对路径
+   导入 —— 与真实使用者的写法一致，顺带验证包的解析是否正确。
+   ============================================================= */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@import '@hsinyau/design-system/styles.css';
+
+/* 仅本文档站使用的外壳样式，不在库里 */
+@import './docs-shell.css';

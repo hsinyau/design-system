@@ -1,0 +1,332 @@
+---
+import Docs from '@/layouts/Docs.astro'
+
+interface HeadingRow {
+  tag: string
+  size: string
+  use: string
+}
+
+/** 标题阶梯：base.css 已把 h1–h6 全部切到无衬线。 */
+const headings: HeadingRow[] = [
+  { tag: 'h1', size: '2.25rem / 36px', use: '内页标题，一页一个' },
+  { tag: 'h2', size: '1.75rem / 28px', use: '区块标题' },
+  { tag: 'h3', size: '1.375rem / 22px', use: '子区块标题' },
+  { tag: 'h4', size: '1.125rem / 18px', use: '卡片组标题' },
+  { tag: 'h5', size: '1rem / 16px', use: '最小标题' },
+  { tag: 'h6', size: '0.875rem / 14px', use: '大写小标签（同时是 muted 色）' },
+]
+
+interface StepRow {
+  px: string
+  rem: string
+  use: string
+}
+
+/** 字号阶梯：全站只用这十档，写作时先挑档位再落值。 */
+const steps: StepRow[] = [
+  { px: '10px', rem: '0.625rem', use: 'eyebrow 小标签、侧栏分组标题' },
+  { px: '11px', rem: '0.6875rem', use: '顶栏脚注、字标内文字、极小标记' },
+  { px: '12px', rem: '0.75rem', use: '元信息、日期、计数、代码块、规格表' },
+  { px: '13px', rem: '0.8125rem', use: '导航链接、次级 UI 文案、注释、图注' },
+  { px: '14px', rem: '0.875rem', use: '按钮、表单控件、卡片标题、h6' },
+  { px: '15px', rem: '0.9375rem', use: '正文（body 默认）、页面 lede、大号按钮' },
+  { px: '16px', rem: '1rem', use: 'h5、面板内小标题' },
+  { px: '18px', rem: '1.125rem', use: 'h4、区块小标题、徽章名' },
+  { px: '24px', rem: '1.5rem', use: '大区块标题（大屏升到 28px）、主题卡标题' },
+  { px: '30px', rem: '1.875rem', use: '统计大数字、空状态大文案' },
+]
+
+interface SplitRow {
+  role: string
+  font: 'mono' | 'sans'
+  note: string
+}
+
+/** mono / sans 分工：这套语言最容易被抄错的地方。 */
+const split: SplitRow[] = [
+  { role: '正文段落', font: 'mono', note: 'body 默认字体，从未被覆盖' },
+  { role: '按钮', font: 'mono', note: '.zz-btn { font-family: var(--zz-font-mono) }' },
+  { role: '导航链接', font: 'mono', note: '不声明字体，继承 body' },
+  { role: '表单控件', font: 'mono', note: '输入框、Select 触发器与选项' },
+  { role: '元信息 / 日期 / 计数', font: 'mono', note: '另加 tabular-nums' },
+  { role: '行内 code 与代码块', font: 'mono', note: 'code / kbd / samp / pre' },
+  { role: 'h1–h6 标题', font: 'sans', note: '全局规则，字距 -0.015em' },
+  { role: '卡片标题', font: 'sans', note: '显式声明 font-sans' },
+  { role: '表头 th', font: 'sans', note: '.zz-spec thead th { font-weight: 600 }' },
+  { role: '统计大数字', font: 'sans', note: '唯一允许 font-bold 的地方' },
+]
+---
+
+<Docs title="排版" description="zz design system 的排版：等宽为默认，标题走无衬线。">
+  <span class="zz-doc__eyebrow">基础 / 排版</span>
+  <h1 class="zz-doc__title">排版</h1>
+  <p class="zz-doc__lede">
+    整套语言只用一个反直觉的规则建立性格：<strong>默认字体是等宽</strong>，只有标题、卡片标题、表头和统计大数字
+    切到无衬线。因此正文、按钮、导航、表单控件、元信息全部是 mono——如果你从 sans 基线起手，复刻出来的观感会完全不同。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>等宽 vs 无衬线</h2>
+    <p>分工表就是全部规则。没有第三档字体，也不按"重要性"挑字体。</p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>角色</th><th>字体</th><th>依据</th></tr>
+      </thead>
+      <tbody>
+        {
+          split.map((row) => (
+            <tr>
+              <td>{row.role}</td>
+              <td>
+                <code>{row.font}</code>
+              </td>
+              <td>{row.note}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-fontsplit">
+        <div>
+          <p class="zz-fontsplit__label">mono · 正文 / 界面（默认）</p>
+          <p class="zz-fontsplit__mono">Handle 大小写敏感，数字 0123456789 等宽对齐。</p>
+        </div>
+        <div>
+          <p class="zz-fontsplit__label">sans · 只用在这些角色</p>
+          <p class="zz-fontsplit__sans">标题、卡片标题、表头、统计数字。</p>
+        </div>
+      </div>
+    </div>
+    <p class="zz-callout">
+      最容易抄错的一条：<strong>按钮和导航是等宽</strong>。它们不声明 <code>font-family</code>，直接继承
+      <code>body</code> 的 mono；只有显式写 <code>font-sans</code> 的元素才走无衬线。所以要往 sans 上"修正"按钮，
+      方向是反的。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>标题阶梯</h2>
+    <p>
+      下面用真实标签渲染。标题一律 <code>font-weight 600</code>、<code>line-height 1.2</code>、
+      <code>letter-spacing -0.015em</code>；<code>h6</code> 是唯一例外，它是大写小标签而不是标题。
+    </p>
+    <div class="zz-stage zz-stage--plain">
+      <div class="zz-hdemo">
+        <h1>页面标题 H1</h1>
+        <span class="zz-hdemo__meta">2.25rem · 一页一个</span>
+      </div>
+      <div class="zz-hdemo">
+        <h2>区块标题 H2</h2>
+        <span class="zz-hdemo__meta">1.75rem · 文档页 section 内缩到 1.25rem</span>
+      </div>
+      <div class="zz-hdemo">
+        <h3>子区块标题 H3</h3>
+        <span class="zz-hdemo__meta">1.375rem</span>
+      </div>
+      <div class="zz-hdemo">
+        <h4>卡片组标题 H4</h4>
+        <span class="zz-hdemo__meta">1.125rem</span>
+      </div>
+      <div class="zz-hdemo">
+        <h5>最小标题 H5</h5>
+        <span class="zz-hdemo__meta">1rem</span>
+      </div>
+      <div class="zz-hdemo">
+        <h6>大写小标签 H6</h6>
+        <span class="zz-hdemo__meta">0.875rem · uppercase · muted</span>
+      </div>
+    </div>
+    <p class="zz-doc__note">
+      演示块里出现了真实的 <code>&lt;h1&gt;</code>。真实页面里一个文档应只有一个 h1，其余从 h2 起往下排，
+      不要为了字号跳级——要字号就改类名，不要改标签。
+    </p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>标签</th><th>字号</th><th>使用场合</th></tr>
+      </thead>
+      <tbody>
+        {
+          headings.map((row) => (
+            <tr>
+              <td><code>{row.tag}</code></td>
+              <td>{row.size}</td>
+              <td>{row.use}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>字号阶梯</h2>
+    <p>十档像素值，全部映射到 rem。挑字号就是挑用途，不要在两档之间插任意值。</p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>px</th><th>rem</th><th>用途</th></tr>
+      </thead>
+      <tbody>
+        {
+          steps.map((row) => (
+            <tr>
+              <td><code>{row.px}</code></td>
+              <td><code>{row.rem}</code></td>
+              <td>{row.use}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="zz-doc__note">标题档的 22 / 28 / 36px 不在这张表里，它们由 h3 / h2 / h1 固定承担。</p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>角色配方</h2>
+    <p>把 token 组合成四种固定角色，直接复制：</p>
+    <div class="zz-stage">
+      <div class="zz-recipes">
+        <div>
+          <p class="zz-recipes__label">eyebrow 小标签</p>
+          <span class="zz-doc__eyebrow">基础 / 排版</span>
+        </div>
+        <div>
+          <p class="zz-recipes__label">正文段落</p>
+          <p class="zz-recipes__body">
+            正文用 0.9375rem、行高 1.6、颜色 <code>--zz-text-secondary</code>，最大宽度 <code>var(--zz-measure)</code>（48rem）。
+            行内 <code>code</code> 与正文同族，因此不会产生字体突跳。
+          </p>
+        </div>
+        <div>
+          <p class="zz-recipes__label">元信息行</p>
+          <p class="zz-recipes__meta">2026-10-15 · 1,204 字 · 3 个依赖 · 0 个告警</p>
+        </div>
+        <div>
+          <p class="zz-recipes__label">行内 code</p>
+          <p class="zz-recipes__body">改主题只需要写 <code>data-theme="light"</code> 一个属性。</p>
+        </div>
+      </div>
+    </div>
+    <pre class="zz-doc__code"><code>{`<!-- eyebrow：0.625rem / uppercase / letter-spacing 0.18em / 品牌色 -->
+<span class="zz-doc__eyebrow">基础 / 排版</span>
+
+<!-- 正文：0.9375rem / line-height 1.6 / --zz-text-secondary -->
+<p class="zz-doc__lede">正文…</p>
+
+<!-- 元信息：0.75rem / --zz-text-muted / tabular-nums -->
+<p style="font-size:0.75rem;color:var(--zz-text-muted);font-variant-numeric:tabular-nums">
+  2026-10-15 · 1,204 字
+</p>`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>行高与字距</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>对象</th><th>行高</th><th>字距</th><th>备注</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>正文（body）</td><td><code>1.6</code></td><td>默认</td><td>0.9375rem 正文的默认节奏</td></tr>
+        <tr><td>长文 / lede</td><td><code>1.65</code></td><td>默认</td><td>整段阅读时再松一点</td></tr>
+        <tr><td>卡片正文</td><td><code>1.625</code></td><td>默认</td><td>13px 卡片内文</td></tr>
+        <tr><td>紧凑行</td><td><code>1.375</code></td><td>默认</td><td>标题+副标题成对出现时</td></tr>
+        <tr><td>标题 h1–h6</td><td><code>1.2</code></td><td><code>-0.015em</code></td><td>无衬线大字号必须收紧</td></tr>
+        <tr><td>eyebrow / 小标签</td><td>继承</td><td><code>0.18em</code></td><td>配 <code>uppercase</code></td></tr>
+        <tr><td>h6 小标签</td><td>继承</td><td><code>0.08em</code></td><td>配 <code>uppercase</code>，不配 muted 以外颜色</td></tr>
+        <tr><td>纯数字 / 图标</td><td><code>1</code></td><td>默认</td><td>只在这种情况下允许压到 1</td></tr>
+      </tbody>
+    </table>
+    <p class="zz-doc__note">
+      正文字号从不是任意值：<code>15px</code> 是正文基准，<code>14px</code> 是控件基准，
+      <code>12px</code> 是元信息基准。三档之外的语境，先用现有档位凑，凑不出来说明结构该拆。
+    </p>
+  </section>
+
+  <style>
+    .zz-fontsplit {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    }
+
+    .zz-fontsplit__label,
+    .zz-recipes__label {
+      color: var(--zz-text-muted);
+      font-family: var(--zz-font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .zz-fontsplit__mono {
+      margin-top: 0.5rem;
+      font-family: var(--zz-font-mono);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      color: var(--zz-text-secondary);
+    }
+
+    .zz-fontsplit__sans {
+      margin-top: 0.5rem;
+      font-family: var(--zz-font-sans);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      color: var(--zz-text-secondary);
+    }
+
+    .zz-callout {
+      margin-top: 1rem;
+      max-width: var(--zz-measure);
+      border-left: 2px solid var(--zz-brand);
+      background: var(--zz-brand-soft);
+      padding: 0.75rem 1rem;
+      color: var(--zz-text);
+      font-size: 0.8125rem;
+      line-height: 1.65;
+    }
+
+    .zz-hdemo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      align-items: baseline;
+      justify-content: space-between;
+      border-top: 1px solid var(--zz-border-subtle);
+      padding-block: 0.875rem;
+    }
+
+    .zz-hdemo:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .zz-hdemo__meta {
+      color: var(--zz-text-muted);
+      font-family: var(--zz-font-mono);
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .zz-recipes {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .zz-recipes__body {
+      margin-top: 0.5rem;
+      max-width: var(--zz-measure);
+      color: var(--zz-text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .zz-recipes__meta {
+      margin-top: 0.5rem;
+      color: var(--zz-text-muted);
+      font-family: var(--zz-font-mono);
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</Docs>

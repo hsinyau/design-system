@@ -1,0 +1,299 @@
+---
+import Docs from '@/layouts/Docs.astro'
+
+interface DurRow {
+  token: string
+  value: string
+  use: string
+  note: string
+}
+
+const durations: DurRow[] = [
+  {
+    token: '--zz-dur-fast',
+    value: '100ms',
+    use: '浮层进出、瞬时状态反馈',
+    note: '下拉与浮层的自带进出场，视觉上"立刻"发生',
+  },
+  {
+    token: '--zz-dur',
+    value: '150ms',
+    use: '默认：悬停 / 焦点变色、描边变化、背景切换',
+    note: '绝大多数过渡都用这一档，也是 :focus-visible 与 :hover 的时长',
+  },
+  {
+    token: '--zz-dur-slow',
+    value: '250ms',
+    use: '进入动画：元素上浮、淡入',
+    note: '只用于"新东西出现"，不用于已存在元素的属性变化',
+  },
+  {
+    token: '--zz-ease',
+    value: 'cubic-bezier(0.2, 0, 0, 1)',
+    use: '全站唯一缓动曲线',
+    note: '快起慢收，开头干脆、结尾稳定，不要改 ease-in-out',
+  },
+]
+---
+
+<Docs title="动效与可访问性" description="zz design system 的动效时长、反馈规则、主题切换裂缝与可访问性做法。">
+  <span class="zz-doc__eyebrow">基础 / 动效</span>
+  <h1 class="zz-doc__title">动效与可访问性</h1>
+  <p class="zz-doc__lede">
+    动效只有三档时长和一条缓动曲线，且几乎全部发生在颜色与描边上：界面<strong>从不位移</strong>。
+    唯一的例外是按下时的 <code>scale(0.96)</code> 和主题切换时那道斜切裂缝。
+  </p>
+
+  <section class="zz-doc__section">
+    <h2>时长与缓动</h2>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>token</th><th>值</th><th>用于</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        {
+          durations.map((row) => (
+            <tr>
+              <td><code>{row.token}</code></td>
+              <td><code>{row.value}</code></td>
+              <td>{row.use}</td>
+              <td>{row.note}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="zz-doc__note">
+      主题切换是单独一档：<code>200ms</code> + <code>cubic-bezier(0.7, 0, 1, 1)</code>，
+      定义在 <code>theme-transition.css</code> 里而不占用上面三个 token——它是"裂缝"专用曲线，
+      不是通用动效。过渡属性必须逐个列出，禁止 <code>transition: all</code>。
+    </p>
+    <pre class="zz-doc__code"><code>{`.zz-btn {
+  transition-property: background-color, border-color, color, transform;
+  transition-duration: var(--zz-dur);
+  transition-timing-function: var(--zz-ease);
+}`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>交互反馈</h2>
+    <p>
+      两条规则足以覆盖所有可交互元素：<strong>悬停只改颜色</strong>（背景、描边、文字色），
+      <strong>按下只做 <code>scale(0.96)</code></strong>。二者都不改变布局，因此不会有重排抖动，
+      也不会让相邻元素跟着跳。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-feedback">
+        <button class="zz-feedback__hover" type="button">
+          <span class="zz-feedback__title">悬停改色</span>
+          <span class="zz-feedback__meta">hover 我：底色 surface → surface-2，位置不动</span>
+        </button>
+        <button class="zz-feedback__press" type="button">
+          <span class="zz-feedback__title">按下回弹</span>
+          <span class="zz-feedback__meta">按住我：transform: scale(0.96)</span>
+        </button>
+      </div>
+    </div>
+    <pre class="zz-doc__code"><code>{`.zz-hoverable:hover { background: var(--zz-surface-2); }      /* 只改色，不位移 */
+.zz-pressable:active { transform: scale(0.96); }                /* 只缩放，不改布局 */
+.zz-pressable:disabled { opacity: 0.5; pointer-events: none; }`}</code></pre>
+    <p class="zz-doc__note">
+      禁用态统一为 <code>opacity: .5</code> + <code>pointer-events: none</code>；
+      渲染成 <code>&lt;a&gt;</code> 时用 <code>aria-disabled="true"</code> 代替 <code>disabled</code>，并保留可聚焦性。
+      不用 <code>translateY(-1px)</code> 之类的"抬起"反馈——那是阴影语言的做法，直角 + 描边的语言里没有这一手。
+    </p>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>主题切换：斜切裂缝</h2>
+    <p>
+      切换主题时会盖上一层新快照，旧快照沿一条 <code>100deg</code> 的斜缝从中间向两侧裂开，露出新页面。
+      实现靠 View Transitions API 加一个可补间的自定义属性：
+    </p>
+    <ol class="zz-steps">
+      <li>用 <code>@property --zz-wipe</code> 把裂缝宽度声明为可补间的 <code>&lt;length-percentage&gt;</code>。</li>
+      <li>把 <code>::view-transition-old(root)</code> 的 <code>mask-image</code> 写成一条 <code>100deg</code> 的线性渐变：中心 <code>±var(--zz-wipe)</code> 之外才显示旧页面。</li>
+      <li>关键帧把 <code>--zz-wipe</code> 从 <code>0px</code> 推到 <code>80%</code>，时长 <code>200ms</code>、曲线 <code>cubic-bezier(0.7, 0, 1, 1)</code>。</li>
+      <li>切换瞬间给根节点加 <code>.zz-no-transitions</code>，关掉全局过渡，否则每个颜色都会各自补间。</li>
+    </ol>
+    <p class="zz-doc__note">想直接看效果：点顶栏右侧的太阳/月亮开关，注意裂缝的倾角与收尾速度。</p>
+    <pre class="zz-doc__code"><code>{`@property --zz-wipe {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  animation: zz-split-wipe 200ms cubic-bezier(0.7, 0, 1, 1) both;
+  mask-image: linear-gradient(
+    100deg,
+    #000 0,
+    #000 calc(50% - var(--zz-wipe) + 1px),
+    #0000 calc(50% - var(--zz-wipe) + 1px),
+    #0000 calc(50% + var(--zz-wipe) - 1px),
+    #000 calc(50% + var(--zz-wipe) - 1px),
+    #000 100%
+  );
+}
+
+@keyframes zz-split-wipe {
+  from { --zz-wipe: 0px; }
+  to   { --zz-wipe: 80%; }
+}`}</code></pre>
+  </section>
+
+  <section class="zz-doc__section">
+    <h2>可访问性</h2>
+    <h3 class="zz-subhead">焦点可见</h3>
+    <p>
+      全局只有一条规则：<code>outline: 2px solid var(--zz-brand)</code> + <code>outline-offset: 2px</code>。
+      焦点环用品牌色是为了满足 3:1 的指示器对比度要求，所以换主色时要重新确认它仍然看得见。
+    </p>
+    <div class="zz-stage">
+      <div class="zz-row">
+        <button class="zz-focus__btn" type="button">按钮 · 按 Tab</button>
+        <a class="zz-focus__link" href="/foundations/motion">链接 · 按 Tab</a>
+        <input class="zz-focus__input" type="text" placeholder="输入框" aria-label="焦点环示例输入框" />
+      </div>
+      <div class="zz-focus__scroll zz-scroll-inset">
+        <p class="zz-focus__scroll-note">滚动容器内的焦点环改内缩，避免被裁切：</p>
+        <button class="zz-focus__btn" type="button">内缩焦点环（offset -2px）</button>
+      </div>
+    </div>
+    <ul class="zz-doc__note">
+      <li>不要在组件里写 <code>outline: none</code>；要自定义就把焦点环换成等价的 2px 描边，并保留 3:1 对比度。</li>
+      <li>滚动容器加 <code>.zz-scroll-inset</code>，其内部 <code>:focus-visible</code> 的偏移自动变成 <code>-2px</code>。</li>
+      <li>卡片这类"整块可点"的容器，焦点环画在外层，内部链接不要各画一圈，避免双环。</li>
+    </ul>
+
+    <h3 class="zz-subhead">键盘与结构</h3>
+    <ul class="zz-doc__note">
+      <li>焦点顺序就是 DOM 顺序：不写正的 <code>tabindex</code>，需要提前就把元素在 DOM 里提前。</li>
+      <li>长页面提供跳转链接，排在 DOM 最前，聚焦后才从视口外滑入；装饰层（网格底、图标、遮罩热区）一律 <code>aria-hidden="true"</code>，不进入焦点序。</li>
+      <li>状态用真实属性表达：<code>aria-current</code>、<code>aria-expanded</code>、<code>aria-pressed</code>、<code>aria-disabled</code>，不要只靠视觉类。</li>
+    </ul>
+
+    <h3 class="zz-subhead">减弱动效</h3>
+    <p>
+      每个动画都必须自带 <code>prefers-reduced-motion: reduce</code> 分支。当前的降级覆盖：
+    </p>
+    <table class="zz-spec">
+      <thead>
+        <tr><th>动画</th><th>降级后</th><th>实现位置</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>平滑滚动</td><td><code>scroll-behavior: auto</code></td><td><code>base.css</code></td></tr>
+        <tr><td>打字机光标</td><td><code>.zz-caret</code> 停用 <code>animation</code>（不再闪烁）</td><td><code>base.css</code></td></tr>
+        <tr><td>主题擦除</td><td>view-transition 伪元素 <code>animation: none</code>、<code>mask-image: none</code>，JS 侧直接同步切换</td><td><code>theme-transition.css</code> + 顶栏脚本</td></tr>
+        <tr><td>spinner / 加载反馈</td><td>停用旋转，改为静态文案或静态指示</td><td>组件层</td></tr>
+        <tr><td>进入动画</td><td><code>animation: none</code>，直接落在终态</td><td>组件层</td></tr>
+      </tbody>
+    </table>
+    <p class="zz-doc__note">
+      降级的目标是"没有运动"，不是"更快"：<code>animation: none</code> 而不是把时长调短。
+      组件层的 spinner 与进入动画属于约定项——新增动画时必须同时提交 reduce 分支。
+    </p>
+
+    <h3 class="zz-subhead">原生控件与对比度</h3>
+    <ul class="zz-doc__note">
+      <li>每个主题块都声明 <code>color-scheme: dark</code> 或 <code>color-scheme: light</code>，让滚动条、表单控件、日期选择器等原生 UI 跟随主题明暗；局部换主题的子树也因此表现正确。</li>
+      <li>文字层级靠三档实色而非透明度，正文用 <code>--zz-text-secondary</code>，标题用 <code>--zz-text</code>，元信息用 <code>--zz-text-muted</code>；弱化信息优先降字号、再换档，不要叠 alpha。</li>
+      <li>亮色主题下 <code>--zz-text-muted</code> 比 <code>--zz-text-secondary</code> 更深，暗色主题下则更浅——每档是对背景独立挑的值，不是同一色的变淡。</li>
+      <li>可交互元素有 <code>touch-action: manipulation</code>，去掉触屏 300ms 双击缩放等待；锚点用 <code>scroll-margin-top: calc(var(--zz-nav-h) + 1rem)</code> 避开吸顶栏。</li>
+      <li>颜色从不单独承担语义：状态同时有文案或图标，选中同时有 <code>aria-current</code> / <code>aria-pressed</code>。</li>
+    </ul>
+  </section>
+
+  <style>
+    .zz-subhead {
+      margin-top: 2rem;
+      font-size: 1rem;
+    }
+
+    .zz-feedback {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    }
+
+    .zz-feedback__hover,
+    .zz-feedback__press {
+      display: block;
+      border: 1px solid var(--zz-border-subtle);
+      background: var(--zz-surface);
+      padding: 1rem;
+      text-align: left;
+      font-family: var(--zz-font-mono);
+      cursor: pointer;
+      transition-property: background-color, border-color, transform;
+      transition-duration: var(--zz-dur);
+      transition-timing-function: var(--zz-ease);
+    }
+
+    .zz-feedback__hover:hover {
+      background: var(--zz-surface-2);
+      border-color: var(--zz-border-strong);
+    }
+
+    .zz-feedback__press:active {
+      transform: scale(0.96);
+    }
+
+    .zz-feedback__title {
+      display: block;
+      color: var(--zz-text);
+      font-size: 0.875rem;
+    }
+
+    .zz-feedback__meta {
+      display: block;
+      margin-top: 0.5rem;
+      color: var(--zz-text-muted);
+      font-size: 0.75rem;
+    }
+
+    .zz-steps {
+      margin: 1rem 0 0;
+      max-width: var(--zz-measure);
+      padding-left: 1.25rem;
+      color: var(--zz-text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.7;
+    }
+
+    .zz-focus__btn,
+    .zz-focus__input {
+      border: 1px solid var(--zz-border-strong);
+      background: var(--zz-surface);
+      padding: 0.625rem 0.75rem;
+      color: var(--zz-text);
+      font-family: var(--zz-font-mono);
+      font-size: 0.8125rem;
+    }
+
+    .zz-focus__btn {
+      cursor: pointer;
+    }
+
+    .zz-focus__link {
+      color: var(--zz-brand);
+      font-size: 0.8125rem;
+    }
+
+    .zz-focus__scroll {
+      margin-top: 1.25rem;
+      max-width: 22rem;
+      overflow-x: auto;
+      border: 1px solid var(--zz-border-subtle);
+      background: var(--zz-bg-deep);
+      padding: 0.75rem;
+    }
+
+    .zz-focus__scroll-note {
+      margin-bottom: 0.75rem;
+      color: var(--zz-text-muted);
+      font-size: 0.75rem;
+    }
+  </style>
+</Docs>

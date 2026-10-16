@@ -1,0 +1,32 @@
+/* =============================================================
+   zz design system · 入口
+   -------------------------------------------------------------
+   给 Tailwind v4 项目用的入口：在自己的 CSS 里先
+   @import 'tailwindcss'，再 @import 本文件。
+
+   这里刻意不含 @import 'tailwindcss'，也不含 preflight / reset，
+   更不含文档站外壳样式：库只提供 token、基础层与组件层。
+
+   @theme inline 的桥接写在 tokens.css 里，Tailwind 会据此生成
+   bg-zz-surface、text-zz-text-muted 这类工具类。
+
+   层序 theme → base → components → utilities 由消费项目里的
+   @import 'tailwindcss' 声明，所以本文件必须排在它后面。
+
+   非 Tailwind 项目请改用编译好的独立产物：
+   @import '@hsinyau/design-system/standalone.css'
+   ============================================================= */
+
+@import './fonts.css';
+@import './tokens.css';
+@import './base.css';
+@import './theme-transition.css';
+
+@import './components/button.css';
+@import './components/card.css';
+@import './components/form.css';
+@import './components/table.css';
+@import './components/nav.css';
+@import './components/feedback.css';
+@import './components/overlay.css';
+@import './components/prose.css';

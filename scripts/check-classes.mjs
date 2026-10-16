@@ -2,8 +2,9 @@
  * 类名交叉审计：找出在 class 属性或脚本里引用、但样式层没有定义的 zz-* 类。
  * 未定义意味着样式静默失效（拼错类名是最常见的回归）。
  *
- * 定义来源：src/styles/**\/*.css、页面与组件内的 <style> 块。
- * 引用来源：class="…" 属性、classList 调用里的字符串字面量。
+ * 定义来源：packages/design-system/src/styles/**\/*.css，以及页面 / 组件内的
+ * <style> 块。引用来源：apps/docs 下的 class="…" 属性、classList 调用里的
+ * 字符串字面量。
  *
  * 用法：node scripts/check-classes.mjs
  */
@@ -23,10 +24,11 @@ function walk(dir, test) {
 }
 
 const sourceFiles = [
-  ...walk('src/styles', (n) => n.endsWith('.css')),
-  ...walk('src/components', (n) => n.endsWith('.astro')),
-  ...walk('src/pages', (n) => n.endsWith('.astro')),
-  ...walk('src/layouts', (n) => n.endsWith('.astro')),
+  ...walk('packages/design-system/src/styles', (n) => n.endsWith('.css')),
+  ...walk('apps/docs/src/styles', (n) => n.endsWith('.css')),
+  ...walk('apps/docs/src/components', (n) => n.endsWith('.astro')),
+  ...walk('apps/docs/src/pages', (n) => n.endsWith('.astro')),
+  ...walk('apps/docs/src/layouts', (n) => n.endsWith('.astro')),
 ]
 
 const defined = new Set()
@@ -71,7 +73,8 @@ const missing = [...declared.keys()].filter(
 
 /**
  * 允许清单：这三处不是样式类。
- * - zz-theme / zz-design-system：localStorage 键名与包名
+ * - zz-theme：localStorage 键名
+ * - zz-design-system：示例里用作 placeholder 文本
  * - zz-swatch：纯结构钩子（.zz-swatch 本身无样式，视觉由 __chip / __name / __use 承担）
  */
 const allowlist = new Set(['zz-theme', 'zz-design-system', 'zz-swatch'])

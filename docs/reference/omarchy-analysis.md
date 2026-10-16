@@ -1,7 +1,7 @@
 # 参考项目设计语言分析（归档）
 
 > 对参考站点 omarchy-site 设计语言的提取，作为本设计系统各项决策的依据。
-> 它是外部参考资料，不是本系统的规范：本系统规范见 docs/CONVENTIONS.md，token 值见 src/styles/tokens.css。
+> 它是外部参考资料，不是本系统的规范：本系统规范见 docs/CONVENTIONS.md，token 值见 packages/design-system/src/styles/tokens.css。
 > 文中 `--t-*`、`.prose`、`ring-elevation` 等属于参考项目，本系统的对应物是 `--zz-*`、`.zz-prose`、`.zz-elevation`。
 
 ---
