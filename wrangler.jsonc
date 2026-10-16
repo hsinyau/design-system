@@ -13,5 +13,8 @@
     "html_handling": "auto-trailing-slash",
     // apps/docs/dist/404.html 由 src/pages/404.astro 生成
     "not_found_handling": "404-page"
-  }
+  },
+  // `npx wrangler preview`（按分支创建 Preview）要求配置里有 previews 块，
+  // 内容可以留空：顶层的 assets / compatibility_date 对预览同样生效。
+  "previews": {}
 }
