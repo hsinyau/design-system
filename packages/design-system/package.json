@@ -1,6 +1,6 @@
 {
   "name": "@hsinyau/design-system",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "直角、等宽、1px 描边的 CSS 设计系统：语义 token、两套主题与一组框架无关的组件类",
   "keywords": [
     "design-system",
